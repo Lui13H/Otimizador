@@ -305,11 +305,23 @@
 
     /* ---------- Topo ---------- */
     function carregarExemplo() {
+      if (editando !== -1) sairDaEdicao();
       transacoes = [['Ana', 120, 'Bruno'], ['Bruno', 80, 'Carla'], ['Carla', 50, 'Ana'], ['Diego', 200, 'Ana'], ['Bruno', 35.5, 'Diego']];
       render();
       aviso('Exemplo carregado.');
     }
-    $('btnExemplo').addEventListener('click', carregarExemplo);
+
+    function pedirExemplo() {
+      if (!transacoes.length) return carregarExemplo();
+      const n = transacoes.length;
+      abrirModal({
+        titulo: 'Carregar exemplo?',
+        texto: `Isso vai substituir as <strong>${n} transaç${n === 1 ? 'ão' : 'ões'}</strong> atuais pelo exemplo. Tem certeza de que deseja continuar?`,
+        rotulo: 'Carregar exemplo',
+        aoConfirmar: carregarExemplo
+      });
+    }
+    $('btnExemplo').addEventListener('click', pedirExemplo);
 
     function reiniciarTudo() {
       const backup = transacoes.slice();
