@@ -181,6 +181,55 @@
       grid-column: 1/-1
     }
 
+    .rotulo-linha {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .pin {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--mut);
+      cursor: pointer
+    }
+
+    .pin svg {
+      transform: rotate(45deg);
+      transition: transform .2s
+    }
+
+    .pin:hover {
+      background: rgba(255, 255, 255, .08);
+      color: var(--txt)
+    }
+
+    .pin:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px
+    }
+
+    .pin[aria-pressed="true"] {
+      color: var(--blue2);
+      background: rgba(77, 124, 255, .16);
+      border-color: rgba(77, 124, 255, .4)
+    }
+
+    .pin[aria-pressed="true"] svg {
+      transform: none
+    }
+
+    .campo.fixado input {
+      border-color: rgba(77, 124, 255, .55);
+      box-shadow: 0 0 0 3px rgba(77, 124, 255, .12)
+    }
+
     label {
       font-size: .8rem;
       font-weight: 600;

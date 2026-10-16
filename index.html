@@ -39,15 +39,24 @@
         <p class="sub">Informe quem deve pagar, quanto, e para quem. Ou cole aqui um resumo copiado para importar várias de uma vez.</p>
         <form id="form" autocomplete="off" novalidate>
           <div class="campo">
-            <label for="pagador">Pagador (quem deve)</label>
+            <div class="rotulo-linha">
+              <label for="pagador">Pagador (quem deve)</label>
+              <button class="pin" type="button" data-pin="pagador" aria-pressed="false" aria-label="Fixar pagador" title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 4H7l3-4z"/></svg></button>
+            </div>
             <input id="pagador" required placeholder="Ex.: Ana">
           </div>
           <div class="campo">
-            <label for="recebedor">Recebedor</label>
+            <div class="rotulo-linha">
+              <label for="recebedor">Recebedor</label>
+              <button class="pin" type="button" data-pin="recebedor" aria-pressed="false" aria-label="Fixar recebedor" title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 4H7l3-4z"/></svg></button>
+            </div>
             <input id="recebedor" required placeholder="Ex.: Bruno">
           </div>
           <div class="campo larga">
-            <label for="valor">Valor (R$)</label>
+            <div class="rotulo-linha">
+              <label for="valor">Valor (R$)</label>
+              <button class="pin" type="button" data-pin="valor" aria-pressed="false" aria-label="Fixar valor" title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 3h6l-1 6 3 4H7l3-4z"/></svg></button>
+            </div>
             <input id="valor" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0,00">
           </div>
           <div class="previa" id="previa" aria-live="polite">Preencha os campos para ver o resumo da transação.</div>

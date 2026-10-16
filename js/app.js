@@ -133,9 +133,38 @@
     }
     ['pagador', 'recebedor', 'valor'].forEach(id => $(id).addEventListener('input', () => { $('erro').textContent = ''; atualizarPrevia(); }));
 
+    /* Campos fixados (pin) mantêm o valor ao adicionar outra transação */
+    const CAMPOS = ['pagador', 'recebedor', 'valor'];
+    const PINS = new Set();
+
+    function atualizarPins() {
+      CAMPOS.forEach(id => {
+        const fixo = PINS.has(id);
+        const b = document.querySelector(`[data-pin="${id}"]`);
+        b.setAttribute('aria-pressed', String(fixo));
+        b.title = fixo ? 'Desafixar' : 'Fixar (mantém o valor ao adicionar outra)';
+        $(id).closest('.campo').classList.toggle('fixado', fixo);
+      });
+    }
+
+    function limparNaoFixados() {
+      CAMPOS.forEach(id => { if (!PINS.has(id)) $(id).value = ''; });
+    }
+
+    function focarProximo() {
+      $(CAMPOS.find(id => !PINS.has(id)) || 'valor').focus();
+    }
+
+    document.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.pin;
+      if (PINS.has(id)) PINS.delete(id); else PINS.add(id);
+      atualizarPins();
+    }));
+    atualizarPins();
+
     function sairDaEdicao() {
       editando = -1;
-      $('form').reset();
+      limparNaoFixados();
       $('tituloForm').textContent = 'Registrar transação';
       $('btnSalvar').textContent = 'Adicionar transação';
       $('btnCancelar').hidden = true;
@@ -153,7 +182,7 @@
       else { transacoes[editando] = [nomeCanonico(p), v, nomeCanonico(r)]; aviso('Transação atualizada.'); }
       sairDaEdicao();
       render();
-      $('pagador').focus();
+      focarProximo();
     });
 
     function erro(msg, campo) { $('erro').textContent = msg; $(campo).focus(); }
