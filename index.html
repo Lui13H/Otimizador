@@ -20,6 +20,7 @@
         <p>Registre quem deve a quem. O sistema calcula o menor número de transferências para acertar todo mundo.</p>
       </div>
       <div class="acoes">
+        <a class="btn" href="documentacao.html">Como usar</a>
         <button class="btn alternar" id="btnAnimacao" type="button" role="switch" aria-checked="true"><span
             class="chave" aria-hidden="true"></span>Mostrar animação</button>
         <button class="btn" id="btnExemplo" type="button">Carregar exemplo</button>
@@ -60,16 +61,27 @@
             <input id="valor" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0,00">
           </div>
           <div class="previa" id="previa" aria-live="polite">Preencha os campos para ver o resumo da transação.</div>
-          <div class="importar-bloco">
-            <label for="colar">Importar várias de uma vez</label>
-            <input id="colar" class="colar" placeholder="Clique aqui e cole (Ctrl+V) um resumo ou uma tabela do Excel"
-              aria-describedby="colarAjuda">
-            <div class="importar-linha">
-              <button class="btn" id="btnImportarExcel" type="button">Importar arquivo Excel</button>
-              <span id="colarAjuda">ou arraste um arquivo .xlsx para o campo acima</span>
+
+          <div class="lote-bloco">
+            <p class="lote-titulo">Adicionar em lote</p>
+
+            <div class="lote-item">
+              <button class="btn grupo" id="btnDividirConta" type="button">Adicionar conta em grupo</button>
+              <span>Uma pessoa paga, e o valor é repartido entre quem participou</span>
             </div>
-            <input type="file" id="arquivoExcel" accept=".xlsx,.xlsm,.csv,.tsv,.txt" hidden>
+
+            <div class="importar-bloco">
+              <label for="colar">Colar um resumo ou uma tabela do Excel</label>
+              <input id="colar" class="colar" placeholder="Clique aqui e cole (Ctrl+V) um resumo ou uma tabela do Excel"
+                aria-describedby="colarAjuda">
+              <div class="importar-linha">
+                <button class="btn" id="btnImportarExcel" type="button">Importar arquivo Excel</button>
+                <span id="colarAjuda">ou arraste um arquivo .xlsx para o campo acima</span>
+              </div>
+              <input type="file" id="arquivoExcel" accept=".xlsx,.xlsm,.csv,.tsv,.txt" hidden>
+            </div>
           </div>
+
           <div class="erro" id="erro" role="alert"></div>
           <div class="linha-btns">
             <button class="btn primario" id="btnSalvar" type="submit">Adicionar transação</button>
@@ -139,6 +151,7 @@
   <script src="js/interface/animacao.js"></script>
   <script src="js/interface/autocomplete.js"></script>
   <script src="js/interface/copiar.js"></script>
+  <script src="js/interface/conta-conjunta.js"></script>
   <script src="js/dados/importar.js"></script>
   <script src="js/dados/excel.js"></script>
   <script src="js/app.js"></script>

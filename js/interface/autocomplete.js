@@ -4,9 +4,11 @@
  * Não depende do algorithm.js. Mostra as pessoas já cadastradas enquanto o
  * usuário digita, destaca o trecho que combina e avisa quando o nome é novo.
  *
- * Uso:  AutocompleteNomes.ligar(inputElemento, () => ['Ana', 'Bruno'], () => outroCampo.value)
+ * Uso:  AutocompleteNomes.ligar(inputElemento, () => ['Ana', 'Bruno'], () => outroCampo.value, nome => {})
  * O segundo parâmetro é uma função que devolve a lista de nomes atual.
  * O terceiro (opcional) devolve o nome do outro campo: essa pessoa não é sugerida.
+ * O quarto (opcional) é chamado com o nome assim que uma sugestão é escolhida
+ * (clique ou Enter), além do campo já ser preenchido normalmente.
  * Se existir a função global avatar(nome), ela é usada para mostrar o ícone.
  */
 (function () {
@@ -44,7 +46,7 @@
     return esc(nome.slice(0, i)) + '<strong>' + esc(nome.slice(i, i + consulta.length)) + '</strong>' + esc(nome.slice(i + consulta.length));
   }
 
-  function ligar(input, obterNomes, obterOutro) {
+  function ligar(input, obterNomes, obterOutro, aoEscolher) {
     const id = 'ac-lista-' + (++contador);
     const campo = input.parentElement;
     const painel = input.closest('.panel');
@@ -96,6 +98,7 @@
       input.value = nome;
       input.dispatchEvent(new Event('input', { bubbles: true })); // atualiza a prévia e limpa erros
       fechar();
+      if (aoEscolher) aoEscolher(nome);
     }
 
     function atualizar() {

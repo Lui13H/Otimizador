@@ -363,6 +363,15 @@
     ImportarResumo.ligarCampoDedicado($('colar'));
     ExcelTransacoes.ligarImportacao($('btnImportarExcel'), $('arquivoExcel'), $('colar'));
 
+    /* ---------- Dividir conta em grupo ---------- */
+    ContaConjunta.ligar(nomesExistentes, ({ pagador, partes }) => {
+      const pagadorNome = nomeCanonico(pagador);
+      partes.forEach(p => transacoes.push([nomeCanonico(p.nome), p.valor, pagadorNome]));
+      render();
+      aviso(partes.length === 1 ? '1 transação adicionada.' : `${partes.length} transações adicionadas.`);
+    });
+    $('btnDividirConta').addEventListener('click', () => ContaConjunta.abrir());
+
     $('btnCopiarTrans').addEventListener('click', () => {
       if (!transacoes.length) return aviso('Não há transações para copiar.');
       CopiarModal.abrir({

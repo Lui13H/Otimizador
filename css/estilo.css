@@ -7,6 +7,7 @@
       --blue2: #8fb0ff;
       --pos: #3ddc97;
       --neg: #ff7a90;
+      --grupo: #b985ff;
       --glass: linear-gradient(160deg, rgba(20, 34, 76, .72), rgba(8, 14, 34, .86));
       --gap: 20px;
       --radius: 20px;
@@ -302,7 +303,12 @@
       border-radius: 12px;
       color: var(--txt);
       background: rgba(255, 255, 255, .04);
-      transition: background .15s, border-color .15s
+      transition: background .15s, border-color .15s;
+      text-decoration: none
+    }
+
+    .btn[hidden] {
+      display: none
     }
 
     .btn:hover {
@@ -321,6 +327,17 @@
 
     .btn.perigo {
       color: var(--neg)
+    }
+
+    .btn.grupo {
+      color: var(--grupo);
+      border-color: rgba(185, 133, 255, .45);
+      background: rgba(185, 133, 255, .08)
+    }
+
+    .btn.grupo:hover {
+      background: rgba(185, 133, 255, .18);
+      border-color: rgba(185, 133, 255, .7)
     }
 
     .linha-btns {
@@ -808,6 +825,32 @@
     input.colar.soltando {
       border-color: var(--blue2);
       background: rgba(77, 124, 255, .14)
+    }
+
+    .lote-bloco {
+      grid-column: 1/-1;
+      display: grid;
+      gap: 12px;
+      margin-top: 4px;
+      padding-top: 14px;
+      border-top: 1px dashed var(--line)
+    }
+
+    .lote-titulo {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--mut)
+    }
+
+    .lote-item {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      font-size: .78rem;
+      color: var(--mut)
     }
 
     .importar-linha {

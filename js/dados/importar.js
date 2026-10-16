@@ -629,6 +629,8 @@
     interpretarGrade: interpretarGrade,
     construir: construir,
     lerValor: lerValor,
-    nomesAtuais: nomesAtuais
+    nomesAtuais: nomesAtuais,
+    conferirSaldo: conferirSaldo,
+    conferirMinimas: conferirMinimas
   };
 })();
