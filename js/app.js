@@ -19,11 +19,17 @@
       return saldos.map(row => ({ nome: row[0], saldo: Math.round(row[1] * 100) }));
     }
 
+    // Primeira letra de cada palavra em maiúscula ("ana  silva" → "Ana Silva")
+    function capitalizarNome(nome) {
+      return String(nome).trim().replace(/\s+/g, ' ').replace(/(^|\s)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+    }
+
     // O algorithm.js diferencia maiúsculas de minúsculas ("Ana" ≠ "ana").
     // Para evitar duas pessoas "iguais", reaproveita a grafia já cadastrada.
     function nomeCanonico(nome) {
-      const achou = consolidarSaldos(transacoes).find(p => p.nome.toLowerCase() === nome.toLowerCase());
-      return achou ? achou.nome : nome;
+      const n = capitalizarNome(nome);
+      const achou = consolidarSaldos(transacoes).find(p => p.nome.toLowerCase() === n.toLowerCase());
+      return achou ? achou.nome : n;
     }
 
     let transacoes = [];   // matriz [pagador, valor, recebedor]
@@ -39,6 +45,7 @@
     let toastTimer;
 
     try { transacoes = JSON.parse(localStorage.getItem(CHAVE)) || []; } catch (e) { transacoes = []; }
+    transacoes = transacoes.map(t => [capitalizarNome(t[0]), t[1], capitalizarNome(t[2])]); // nomes salvos antes em minúsculas
 
     const ICONES = {
       editar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>',
@@ -131,7 +138,12 @@
         ? `<strong>${esc(p)}</strong> deve <strong>${brl(Math.round(v * 100))}</strong> a <strong>${esc(r)}</strong>`
         : 'Preencha os campos para ver o resumo da transação.';
     }
-    ['pagador', 'recebedor', 'valor'].forEach(id => $(id).addEventListener('input', () => { $('erro').textContent = ''; atualizarPrevia(); }));
+    ['pagador', 'recebedor', 'valor'].forEach(id => $(id).addEventListener('input', () => { $('erro').textContent = ''; avisarMesmaPessoa(); atualizarPrevia(); }));
+
+    function avisarMesmaPessoa() {
+      const p = $('pagador').value.trim().toLowerCase(), r = $('recebedor').value.trim().toLowerCase();
+      if (p && p === r) $('erro').textContent = 'Pagador e recebedor devem ser pessoas diferentes.';
+    }
 
     /* Campos fixados (pin) mantêm o valor ao adicionar outra transação */
     const CAMPOS = ['pagador', 'recebedor', 'valor'];
@@ -321,8 +333,8 @@
 
     /* ---------- Sugestão de nomes ---------- */
     const nomesExistentes = () => consolidarSaldos(transacoes).map(p => p.nome).sort((a, b) => a.localeCompare(b));
-    AutocompleteNomes.ligar($('pagador'), nomesExistentes);
-    AutocompleteNomes.ligar($('recebedor'), nomesExistentes);
+    AutocompleteNomes.ligar($('pagador'), nomesExistentes, () => $('recebedor').value);
+    AutocompleteNomes.ligar($('recebedor'), nomesExistentes, () => $('pagador').value);
 
     /* ---------- Importar resumo colado ---------- */
     ImportarResumo.ligar([$('pagador'), $('recebedor'), $('valor')], linhas => {
