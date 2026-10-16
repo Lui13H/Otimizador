@@ -10,7 +10,7 @@
       --glass: linear-gradient(160deg, rgba(20, 34, 76, .72), rgba(8, 14, 34, .86));
       --gap: 20px;
       --radius: 20px;
-      --lista-max: 340px;
+      --card-max: 520px;
       font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
     }
 
@@ -163,6 +163,15 @@
 
     .p-saldos {
       grid-area: saldos
+    }
+
+    /* Limite de altura no card (não na lista): assim cada lista preenche
+       o espaço que sobrar do seu próprio cabeçalho, em vez de todas pararem
+       no mesmo tamanho fixo mesmo quando o cabeçalho acima é menor */
+    .p-result,
+    .p-trans,
+    .p-saldos {
+      max-height: var(--card-max)
     }
 
     form {
@@ -337,7 +346,6 @@
     .lista {
       flex: 1 1 auto;
       min-height: 120px;
-      max-height: var(--lista-max);
       overflow-y: auto;
       padding-right: 4px;
       scrollbar-width: thin;

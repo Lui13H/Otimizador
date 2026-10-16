@@ -1,5 +1,6 @@
     const $ = id => document.getElementById(id);
     const brl = c => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtValorSimples = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const esc = s => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
     const CHAVE = 'otimizador-transacoes';
 
@@ -337,11 +338,15 @@
       if (transacoes.length) pedirReinicio();
     });
 
-    $('btnCopiar').addEventListener('click', async () => {
-      const texto = otimizarTransacoesMatriz(transacoes)
-        .map(a => `${a.de} → ${a.para}: ${brl(Math.round(a.valor * 100))}`).join('\n');
-      try { await navigator.clipboard.writeText(texto); aviso('Resumo copiado. Cole onde quiser.'); }
-      catch (e) { aviso('Não foi possível copiar automaticamente.'); }
+    $('btnCopiar').addEventListener('click', () => {
+      const acertos = otimizarTransacoesMatriz(transacoes);
+      if (!acertos.length) return aviso('Não há transferências para copiar.');
+      CopiarModal.abrir({
+        titulo: 'Copiar Transações Mínimas',
+        qtd: acertos.length,
+        textoIntuitivo: acertos.map(a => `${a.de} paga → ${a.para} recebe: ${brl(Math.round(a.valor * 100))}`).join('\n'),
+        textoExcel: acertos.map(a => `${a.de}\t${fmtValorSimples(a.valor)}\t${a.para}`).join('\n')
+      });
     });
 
     /* ---------- Sugestão de nomes ---------- */
@@ -358,10 +363,14 @@
     ImportarResumo.ligarCampoDedicado($('colar'));
     ExcelTransacoes.ligarImportacao($('btnImportarExcel'), $('arquivoExcel'), $('colar'));
 
-    $('btnCopiarTrans').addEventListener('click', async () => {
-      const texto = transacoes.map(t => `${t[0]} deve ${brl(Math.round(t[1] * 100))} a ${t[2]}`).join('\n');
-      try { await navigator.clipboard.writeText(texto); aviso('Transações copiadas. Cole onde quiser.'); }
-      catch (e) { aviso('Não foi possível copiar automaticamente.'); }
+    $('btnCopiarTrans').addEventListener('click', () => {
+      if (!transacoes.length) return aviso('Não há transações para copiar.');
+      CopiarModal.abrir({
+        titulo: 'Copiar Transações Registradas',
+        qtd: transacoes.length,
+        textoIntuitivo: transacoes.map(t => `${t[0]} paga → ${t[2]} recebe: ${brl(Math.round(t[1] * 100))}`).join('\n'),
+        textoExcel: transacoes.map(t => `${t[0]}\t${fmtValorSimples(t[1])}\t${t[2]}`).join('\n')
+      });
     });
 
     $('btnExportarTrans').addEventListener('click', async () => {
