@@ -1,0 +1,5 @@
+add confirmacao para carregar exemplo
+
+ao exportal excel dar opcao se quer exportar tudo ou apenas as transferencias nao confirmadas
+
+se for mandada trabsfereencias pagas aparever mais uma coluna com o status pago (sim ou não)
