@@ -113,6 +113,7 @@
         `<li class="vazio"><b>${transacoes.length ? 'Tudo quitado!' : 'Aguardando transações'}</b>${transacoes.length ? 'Nenhuma transferência é necessária.' : 'Assim que você registrar a primeira, o resultado aparece aqui.'}</li>`;
 
       $('cabAcoes').hidden = !acertos.length;
+      $('cabTransAcoes').hidden = !transacoes.length;
       const eco = transacoes.length - acertos.length;
       $('economia').hidden = !(acertos.length && eco > 0);
       $('economia').textContent = `Você reduziu de ${transacoes.length} para ${acertos.length} transferências (${eco} a menos).`;
@@ -357,11 +358,24 @@
     ImportarResumo.ligarCampoDedicado($('colar'));
     ExcelTransacoes.ligarImportacao($('btnImportarExcel'), $('arquivoExcel'), $('colar'));
 
+    $('btnCopiarTrans').addEventListener('click', async () => {
+      const texto = transacoes.map(t => `${t[0]} deve ${brl(Math.round(t[1] * 100))} a ${t[2]}`).join('\n');
+      try { await navigator.clipboard.writeText(texto); aviso('Transações copiadas. Cole onde quiser.'); }
+      catch (e) { aviso('Não foi possível copiar automaticamente.'); }
+    });
+
+    $('btnExportarTrans').addEventListener('click', async () => {
+      if (!transacoes.length) return aviso('Não há transações para exportar.');
+      aviso('Gerando planilha…');
+      try { const nome = await ExcelTransacoes.exportar(transacoes.map(t => [t[0], Number(t[1]), t[2]]), 'transacoes'); aviso('Planilha exportada: ' + nome); }
+      catch (e) { aviso(e.message || 'Não foi possível exportar a planilha.'); }
+    });
+
     $('btnExportar').addEventListener('click', async () => {
       const acertos = otimizarTransacoesMatriz(transacoes);
       if (!acertos.length) return aviso('Não há transferências para exportar.');
       aviso('Gerando planilha…');
-      try { const nome = await ExcelTransacoes.exportar(acertos); aviso('Planilha exportada: ' + nome); }
+      try { const nome = await ExcelTransacoes.exportar(acertos.map(a => [a.de, Number(a.valor), a.para]), 'transferencias'); aviso('Planilha exportada: ' + nome); }
       catch (e) { aviso(e.message || 'Não foi possível exportar a planilha.'); }
     });
 

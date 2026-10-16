@@ -6,7 +6,9 @@
  *
  * Planilha exportada: tabela com as colunas  Paga | Valor | Recebe  (nessa ordem, no topo),
  * com escala de cor condicional na coluna Valor: 0 = verde, meio = amarelo, maior dívida = vermelho.
- * Na importação, as colunas são localizadas pelo título no topo (Paga, Valor, Recebe).
+ * Na importação, as colunas são localizadas pelo título no topo (Paga, Valor, Recebe). Se a
+ * planilha tiver várias tabelas lado a lado (Transações registradas, Saldo Geral, Transações
+ * Mínimas), elas são reconhecidas juntas via ImportarResumo.interpretarGrade — ver importar.js.
  */
 (function () {
   const URLS = [
@@ -41,13 +43,12 @@
   const norm = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
   /* ---------- Exportar ---------- */
-  async function exportar(acertos) {
+  async function exportar(linhas, prefixo = 'transferencias') {
     const ExcelJS = await carregarExcelJS();
     const wb = new ExcelJS.Workbook();
     wb.creator = 'Otimizador de Transações';
     const ws = wb.addWorksheet('Transferências');
 
-    const linhas = acertos.map(a => [a.de, Number(a.valor), a.para]);
     ws.addTable({
       name: 'Transferencias',
       ref: 'A1',
@@ -82,7 +83,7 @@
     const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     const hoje = new Date();
     const pad = n => String(n).padStart(2, '0');
-    const nome = `transferencias-${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}.xlsx`;
+    const nome = `${prefixo}-${hoje.getFullYear()}-${pad(hoje.getMonth() + 1)}-${pad(hoje.getDate())}.xlsx`;
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = nome;
@@ -112,33 +113,32 @@
     return ImportarResumo.lerValor(textoCelula(v));
   }
 
+  // Célula para a grade de leitura: número fica número (sem perder precisão em texto),
+  // qualquer outra coisa vira texto. interpretarGrade sabe lidar com os dois.
+  function celulaGrade(v) {
+    if (v && typeof v === 'object' && 'result' in v) v = v.result;
+    if (typeof v === 'number') return v;
+    return textoCelula(v);
+  }
+
   async function lerXlsx(file) {
     const ExcelJS = await carregarExcelJS();
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(await file.arrayBuffer());
 
     for (const ws of wb.worksheets) {
-      const limite = Math.min(ws.rowCount, 30);
+      const linhas = Math.min(ws.rowCount, 500);
       const colunas = Math.max(ws.columnCount, 3);
-      for (let r = 1; r <= limite; r++) {
-        const titulos = [];
-        for (let c = 1; c <= colunas; c++) titulos.push(norm(textoCelula(ws.getRow(r).getCell(c).value)));
-        const ip = titulos.findIndex(t => t === 'paga' || t === 'pagador') + 1;
-        const iv = titulos.findIndex(t => t === 'valor') + 1;
-        const ir = titulos.findIndex(t => t === 'recebe' || t === 'recebedor') + 1;
-        if (!ip || !iv || !ir) continue;
-
-        const itens = [], ignoradas = [];
-        for (let k = r + 1; k <= ws.rowCount; k++) {
-          const linha = ws.getRow(k);
-          const p = textoCelula(linha.getCell(ip).value);
-          const rec = textoCelula(linha.getCell(ir).value);
-          const bruto = linha.getCell(iv).value;
-          if (!p && !rec && (bruto == null || bruto === '')) continue; // linha em branco
-          itens.push({ tipo: 'certa', p: p, r: rec, v: valorCelula(bruto), origem: 'Linha ' + k });
-        }
-        return ImportarResumo.construir(itens, ignoradas, ImportarResumo.nomesAtuais());
+      const grade = [];
+      for (let r = 1; r <= linhas; r++) {
+        const linha = ws.getRow(r);
+        const celulas = [];
+        for (let c = 1; c <= colunas; c++) celulas.push(celulaGrade(linha.getCell(c).value));
+        grade.push(celulas);
       }
+      // false = sem exigir várias tabelas: uma planilha só com Paga/Valor/Recebe também funciona
+      const resultado = ImportarResumo.interpretarGrade(grade, ImportarResumo.nomesAtuais(), false);
+      if (resultado && resultado.linhas.length) return resultado;
     }
     throw new Error('Não encontrei as colunas "Paga", "Valor" e "Recebe" no topo da planilha.');
   }
@@ -146,7 +146,7 @@
   async function lerArquivo(file) {
     const nome = file.name.toLowerCase();
     if (/\.(xlsx|xlsm)$/.test(nome)) return lerXlsx(file);
-    if (/\.(csv|tsv|txt)$/.test(nome)) return ImportarResumo.interpretar(await file.text(), ImportarResumo.nomesAtuais());
+    if (/\.(csv|tsv|txt)$/.test(nome)) return ImportarResumo.interpretarTexto(await file.text(), ImportarResumo.nomesAtuais());
     if (/\.xls$/.test(nome)) throw new Error('O formato antigo .xls não é suportado. Salve a planilha como .xlsx e tente de novo.');
     throw new Error('Formato não suportado. Use um arquivo .xlsx.');
   }

@@ -81,7 +81,7 @@
       <section class="panel resultado p-result">
         <div class="cab">
           <div>
-            <h2><span class="passo">2</span>Quem paga quem</h2>
+            <h2><span class="passo">2</span>Transações Mínimas</h2>
             <p class="sub">O menor número de transferências que quita todas as dívidas.</p>
           </div>
           <div class="cab-acoes" id="cabAcoes" hidden>
@@ -94,8 +94,16 @@
       </section>
 
       <section class="panel p-trans">
-        <h2>Transações registradas</h2>
-        <p class="sub">Use o lápis para corrigir ou a lixeira para remover.</p>
+        <div class="cab">
+          <div>
+            <h2>Transações registradas</h2>
+            <p class="sub">Use o lápis para corrigir ou a lixeira para remover.</p>
+          </div>
+          <div class="cab-acoes" id="cabTransAcoes" hidden>
+            <button class="btn" id="btnCopiarTrans" type="button">Copiar transferências</button>
+            <button class="btn" id="btnExportarTrans" type="button">Exportar Excel</button>
+          </div>
+        </div>
         <ul class="lista" id="listaTrans"></ul>
       </section>
 

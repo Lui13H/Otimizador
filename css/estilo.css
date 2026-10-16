@@ -458,7 +458,23 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 12px
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .cab .sub {
+      margin-bottom: 0
+    }
+
+    /* Transações registradas: botões em linha própria, abaixo do título */
+    .p-trans .cab {
+      flex-direction: column;
+      align-items: stretch
+    }
+
+    .p-trans .cab-acoes {
+      justify-content: flex-start;
+      margin-top: 14px
     }
 
     .saldo {
@@ -592,7 +608,7 @@
       background: rgba(255, 255, 255, .07)
     }
 
-    /* Quem paga quem: azul vivo (resultado final, em destaque) */
+    /* Transações Mínimas: azul vivo (resultado final, em destaque) */
     .panel.resultado {
       background: linear-gradient(160deg, rgba(40, 84, 214, .55), rgba(9, 22, 78, .92));
       border-color: rgba(120, 165, 255, .7);
