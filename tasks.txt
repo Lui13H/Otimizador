@@ -1,11 +1,41 @@
-ao exportal excel dar opcao se quer exportar tudo ou apenas as transferencias nao confirmadas OK
+== FEITOS ==
 
-se for mandada trabsfereencias pagas aparever mais uma coluna com o status pago (sim ou não) OK
+-- Exportação Excel --
+✅ ao exportar excel dar opcao se quer exportar tudo ou apenas as transferencias nao confirmadas
 
-add marcador de pago na tabela de transações registradas também, que faz com que aquela transferencia não entre mais na conta do saldo nem das transferencias minimas
+✅ se for mandada trabsfereencias pagas aparever mais uma coluna com o status pago (sim ou não)
 
-coloque a lista de transferencias atual como a padrão na hora de carregar exemplo
+-- Transações registradas --
+✅ add marcador de pago na tabela de transações registradas também, que faz com que aquela transferencia não entre mais na conta do saldo nem das transferencias minimas
 
-concerte o tamanho do card de transferencias minimas e também a margem de alguns objetos na pagina de documentação
+-- Exemplo / dados padrão --
+✅ coloque a lista de transferencias atual como a padrão na hora de carregar exemplo
 
-classificação se a otimização foi imperceptível, moderada, média, boa, ótima, impreensindível. De acordo com a % de diminuição da quantidade de transferencias da tabela de transferencias registradas e transferencias minimas
+-- Layout --
+✅ concerte o tamanho do card de transferencias minimas
+
+-- Transações mínimas --
+✅ classificação se a otimização foi imperceptível, moderada, média, boa, ótima, impreensindível. De acordo com a % de diminuição da quantidade de transferencias da tabela de transferencias registradas e transferencias minimas
+
+
+== NÃO FEITOS ==
+
+-- Transações registradas --
+buscar/filtrar na lista de transações registradas por nome
+
+ordenar a lista de transações registradas (por valor, nome ou mais recente)
+
+registrar a data em que uma transação foi marcada como paga
+
+-- Transações mínimas --
+permitir marcar uma transferência mínima como paga parcialmente (valor parcial)
+
+opção de copiar o resumo já formatado pra mandar no WhatsApp
+
+-- Pessoas / Saldos --
+tela ou card com estatísticas gerais (quem mais deve, quem mais recebe, maior transação)
+
+suportar mais de um grupo/rateio separado (ex.: viagem e república em listas distintas)
+
+-- Interface --
+alternar entre tema claro e escuro

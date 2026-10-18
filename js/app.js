@@ -2,6 +2,7 @@
     const brl = c => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     const fmtValorSimples = v => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const esc = s => s.replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const semAcento = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const CHAVE = 'otimizador-transacoes';
 
     // Saldos por pessoa (em centavos), usados só para EXIBIR a lista de saldos.
@@ -18,6 +19,16 @@
         ajustar(matriz[i][2], valor);
       }
       return saldos.map(row => ({ nome: row[0], saldo: Math.round(row[1] * 100) }));
+    }
+
+    // Classifica o % de redução (registradas → mínimas) numa escala de impacto
+    function classificarGanho(pct) {
+      if (pct < 15) return { rotulo: 'Imperceptível', classe: 'ganho-0' };
+      if (pct < 30) return { rotulo: 'Moderada', classe: 'ganho-1' };
+      if (pct < 50) return { rotulo: 'Média', classe: 'ganho-2' };
+      if (pct < 70) return { rotulo: 'Boa', classe: 'ganho-3' };
+      if (pct < 90) return { rotulo: 'Ótima', classe: 'ganho-4' };
+      return { rotulo: 'Imprescindível', classe: 'ganho-5' };
     }
 
     // Primeira letra de cada palavra em maiúscula ("ana  silva" → "Ana Silva")
@@ -38,6 +49,7 @@
     let ultimaExcluida = null;
 
     let notaExtra = '', iniciado = false;
+    let filtroTrans = '', filtroAcertos = '';
 
     // Transações ainda não pagas: só elas entram nos saldos e no algoritmo
     const ativas = () => transacoes.filter(t => !t[3]);
@@ -111,18 +123,31 @@
       $('sAcertos').textContent = acertos.length;
 
 
-      $('listaTrans').innerHTML = transacoes.length ? transacoes.map((t, i) => `
+      const buscaTrans = semAcento(filtroTrans.trim());
+      const transFiltradas = transacoes
+        .map((t, i) => [t, i])
+        .filter(([t]) => !buscaTrans || semAcento(t[0]).includes(buscaTrans) || semAcento(t[2]).includes(buscaTrans));
+
+      $('listaTrans').innerHTML = !transacoes.length
+        ? `<li class="vazio"><b>Nenhuma transação ainda</b>Preencha o formulário para começar.<br><button class="btn" type="button" onclick="carregarExemplo()">Ver um exemplo</button></li>`
+        : transFiltradas.length ? transFiltradas.map(([t, i]) => `
     <li class="item${t[3] ? ' pago' : ''}">
       <input type="checkbox" class="pagar" data-pagar-reg="${i}" ${t[3] ? 'checked' : ''} aria-label="Marcar como paga a transação ${i + 1}: ${esc(t[0])} deve a ${esc(t[2])}" title="${t[3] ? 'Desmarcar como paga' : 'Marcar como paga (sai dos saldos e das Transações Mínimas)'}">
       <span class="txt"><strong>${esc(t[0])}</strong><em>deve a</em><strong>${esc(t[2])}</strong></span>
       <span class="valor-col"><span class="valor">${brl(Math.round(t[1] * 100))}</span>${t[3] ? '<small class="selo-pago">Pago</small>' : ''}</span>
       <button class="icone" data-edit="${i}" aria-label="Editar transação ${i + 1}" title="Editar">${ICONES.editar}</button>
       <button class="icone del" data-del="${i}" aria-label="Excluir transação ${i + 1}" title="Excluir">${ICONES.excluir}</button>
-    </li>`).join('') :
-        `<li class="vazio"><b>Nenhuma transação ainda</b>Preencha o formulário para começar.<br><button class="btn" type="button" onclick="carregarExemplo()">Ver um exemplo</button></li>`;
+    </li>`).join('') : `<li class="vazio">Nenhuma transação encontrada para "${esc(filtroTrans.trim())}".</li>`;
 
-      $('listaAcertos').innerHTML = acertos.length ? acertos.map((a, i) => {
-        const pago = pagos.has(chaveAcerto(a)); return `
+      const buscaAcertos = semAcento(filtroAcertos.trim());
+      const acertosFiltrados = acertos
+        .map((a, i) => [a, i])
+        .filter(([a]) => !buscaAcertos || semAcento(a.de).includes(buscaAcertos) || semAcento(a.para).includes(buscaAcertos));
+
+      $('listaAcertos').innerHTML = !acertos.length
+        ? `<li class="vazio"><b>${transacoes.length ? 'Tudo quitado!' : 'Aguardando transações'}</b>${transacoes.length ? 'Nenhuma transferência é necessária.' : 'Assim que você registrar a primeira, o resultado aparece aqui.'}</li>`
+        : acertosFiltrados.length ? acertosFiltrados.map(([a, i]) => {
+          const pago = pagos.has(chaveAcerto(a)); return `
     <li class="item${pago ? ' pago' : ''}">
       <input type="checkbox" class="pagar" data-pagar="${i}" ${pago ? 'checked' : ''} aria-label="Marcar como pago: ${esc(a.de)} para ${esc(a.para)}" title="${pago ? 'Desmarcar pagamento' : 'Marcar como pago'}">
       <div class="acerto">
@@ -134,15 +159,18 @@
       </div>
       <span class="valor-col"><span class="valor pos">${brl(Math.round(a.valor * 100))}</span>${pago ? '<small class="selo-pago">Pago</small>' : ''}</span>
     </li>`;
-      }).join('') :
-        `<li class="vazio"><b>${transacoes.length ? 'Tudo quitado!' : 'Aguardando transações'}</b>${transacoes.length ? 'Nenhuma transferência é necessária.' : 'Assim que você registrar a primeira, o resultado aparece aqui.'}</li>`;
+        }).join('') : `<li class="vazio">Nenhuma transferência encontrada para "${esc(filtroAcertos.trim())}".</li>`;
 
       $('cabAcoes').hidden = !acertos.length;
       $('cabTransAcoes').hidden = !transacoes.length;
+      $('buscaAcertos').hidden = !acertos.length;
+      $('buscaTrans').hidden = !transacoes.length;
       const abertas = ativas().length;
       const eco = abertas - acertos.length;
+      const ganhoPct = abertas > 0 ? Math.round((1 - acertos.length / abertas) * 100) : 0;
+      const ganho = classificarGanho(ganhoPct);
       $('economia').hidden = !(acertos.length && eco > 0);
-      $('economia').textContent = `Você reduziu de ${abertas} para ${acertos.length} transferências (${eco} a menos).`;
+      $('economia').innerHTML = `Reduziu de ${abertas} para ${acertos.length} transferências (${eco} a menos, −${ganhoPct}%) <span class="selo-ganho ${ganho.classe}">${ganho.rotulo}</span>`;
 
       const max = Math.max(1, ...saldos.map(p => Math.abs(p.saldo)));
       $('listaSaldos').innerHTML = saldos.length ? saldos.map(p => {
@@ -294,6 +322,10 @@
         foco[prox].focus();
       }
     });
+
+    /* ---------- Busca nas listas ---------- */
+    $('buscaTrans').addEventListener('input', () => { filtroTrans = $('buscaTrans').value; render(); });
+    $('buscaAcertos').addEventListener('input', () => { filtroAcertos = $('buscaAcertos').value; render(); });
 
     /* ---------- Ações da lista ---------- */
     $('listaTrans').addEventListener('click', e => {

@@ -169,7 +169,6 @@
     /* Limite de altura no card (não na lista): assim cada lista preenche
        o espaço que sobrar do seu próprio cabeçalho, em vez de todas pararem
        no mesmo tamanho fixo mesmo quando o cabeçalho acima é menor */
-    .p-result,
     .p-trans,
     .p-saldos {
       max-height: var(--card-max)
@@ -340,6 +339,17 @@
       border-color: rgba(185, 133, 255, .7)
     }
 
+    .btn.ajuda {
+      color: var(--pos);
+      border-color: rgba(61, 220, 151, .45);
+      background: rgba(61, 220, 151, .08)
+    }
+
+    .btn.ajuda:hover {
+      background: rgba(61, 220, 151, .18);
+      border-color: rgba(61, 220, 151, .7)
+    }
+
     .linha-btns {
       grid-column: 1/-1;
       display: flex;
@@ -477,6 +487,46 @@
       padding: 10px 13px;
       border-radius: 12px;
       background: rgba(77, 124, 255, .1)
+    }
+
+    .selo-ganho {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .02em
+    }
+
+    .selo-ganho.ganho-0 {
+      background: rgba(140, 153, 189, .28);
+      color: #c2cae3
+    }
+
+    .selo-ganho.ganho-1 {
+      background: rgba(143, 176, 255, .22);
+      color: var(--blue2)
+    }
+
+    .selo-ganho.ganho-2 {
+      background: rgba(73, 194, 192, .22);
+      color: #49c2c0
+    }
+
+    .selo-ganho.ganho-3 {
+      background: rgba(90, 209, 168, .22);
+      color: #5ad1a8
+    }
+
+    .selo-ganho.ganho-4 {
+      background: rgba(61, 220, 151, .25);
+      color: var(--pos)
+    }
+
+    .selo-ganho.ganho-5 {
+      background: rgba(255, 209, 102, .25);
+      color: #ffd166
     }
 
     .cab {
@@ -806,13 +856,6 @@
     }
 
     /* Importação em lote (colar texto / arquivo Excel) */
-    .importar-bloco {
-      grid-column: 1/-1;
-      display: grid;
-      gap: 8px;
-      padding-top: 4px
-    }
-
     input.colar {
       border-style: dashed;
       border-color: rgba(120, 150, 255, .35);
@@ -844,20 +887,24 @@
       color: var(--mut)
     }
 
-    .lote-item {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
-      font-size: .78rem;
-      color: var(--mut)
+    .lote-grade {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-auto-rows: auto;
+      align-items: stretch;
+      gap: 8px 14px
     }
 
-    .importar-linha {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 10px;
+    .lote-grade .btn {
+      width: 100%
+    }
+
+    .lote-grade input.colar {
+      padding: 10px 16px;
+      font-size: .88rem
+    }
+
+    .lote-desc {
       font-size: .78rem;
       color: var(--mut)
     }
@@ -870,6 +917,14 @@
     }
 
     .cab-acoes[hidden] {
+      display: none
+    }
+
+    .busca-lista {
+      margin-bottom: 10px
+    }
+
+    .busca-lista[hidden] {
       display: none
     }
 
@@ -894,6 +949,12 @@
 
       .resumo div {
         padding: 14px
+      }
+    }
+
+    @media (max-width:640px) {
+      .lote-grade {
+        grid-template-columns: 1fr
       }
     }
 
