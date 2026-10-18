@@ -50,6 +50,25 @@
 
     let notaExtra = '', iniciado = false;
     let filtroTrans = '', filtroAcertos = '';
+    let ordemTrans = 'padrao', ordemAcertos = 'padrao';
+
+    const OPCOES_ORDEM = [
+      { valor: 'padrao', rotulo: 'Padrão', desc: 'Como está, sem reordenar' },
+      { valor: 'nome', rotulo: 'Nome (A-Z)', desc: 'Ordem alfabética' },
+      { valor: 'valor-desc', rotulo: 'Valor (maior primeiro)' },
+      { valor: 'valor-asc', rotulo: 'Valor (menor primeiro)' },
+      { valor: 'recente', rotulo: 'Mais recente primeiro', desc: 'Inverte a ordem atual' }
+    ];
+
+    // Recebe pares [item, índiceOriginal] já filtrados e devolve na ordem escolhida
+    function aplicarOrdem(pares, ordem, pegaNome, pegaValor) {
+      const arr = pares.slice();
+      if (ordem === 'nome') arr.sort((a, b) => semAcento(pegaNome(a[0])).localeCompare(semAcento(pegaNome(b[0]))));
+      else if (ordem === 'valor-desc') arr.sort((a, b) => pegaValor(b[0]) - pegaValor(a[0]));
+      else if (ordem === 'valor-asc') arr.sort((a, b) => pegaValor(a[0]) - pegaValor(b[0]));
+      else if (ordem === 'recente') arr.reverse();
+      return arr;
+    }
 
     // Transações ainda não pagas: só elas entram nos saldos e no algoritmo
     const ativas = () => transacoes.filter(t => !t[3]);
@@ -124,9 +143,10 @@
 
 
       const buscaTrans = semAcento(filtroTrans.trim());
-      const transFiltradas = transacoes
-        .map((t, i) => [t, i])
-        .filter(([t]) => !buscaTrans || semAcento(t[0]).includes(buscaTrans) || semAcento(t[2]).includes(buscaTrans));
+      const transFiltradas = aplicarOrdem(
+        transacoes.map((t, i) => [t, i]).filter(([t]) => !buscaTrans || semAcento(t[0]).includes(buscaTrans) || semAcento(t[2]).includes(buscaTrans)),
+        ordemTrans, t => t[0], t => t[1]
+      );
 
       $('listaTrans').innerHTML = !transacoes.length
         ? `<li class="vazio"><b>Nenhuma transação ainda</b>Preencha o formulário para começar.<br><button class="btn" type="button" onclick="carregarExemplo()">Ver um exemplo</button></li>`
@@ -140,9 +160,10 @@
     </li>`).join('') : `<li class="vazio">Nenhuma transação encontrada para "${esc(filtroTrans.trim())}".</li>`;
 
       const buscaAcertos = semAcento(filtroAcertos.trim());
-      const acertosFiltrados = acertos
-        .map((a, i) => [a, i])
-        .filter(([a]) => !buscaAcertos || semAcento(a.de).includes(buscaAcertos) || semAcento(a.para).includes(buscaAcertos));
+      const acertosFiltrados = aplicarOrdem(
+        acertos.map((a, i) => [a, i]).filter(([a]) => !buscaAcertos || semAcento(a.de).includes(buscaAcertos) || semAcento(a.para).includes(buscaAcertos)),
+        ordemAcertos, a => a.de, a => a.valor
+      );
 
       $('listaAcertos').innerHTML = !acertos.length
         ? `<li class="vazio"><b>${transacoes.length ? 'Tudo quitado!' : 'Aguardando transações'}</b>${transacoes.length ? 'Nenhuma transferência é necessária.' : 'Assim que você registrar a primeira, o resultado aparece aqui.'}</li>`
@@ -163,8 +184,8 @@
 
       $('cabAcoes').hidden = !acertos.length;
       $('cabTransAcoes').hidden = !transacoes.length;
-      $('buscaAcertos').hidden = !acertos.length;
-      $('buscaTrans').hidden = !transacoes.length;
+      $('buscaLinhaAcertos').hidden = !acertos.length;
+      $('buscaLinhaTrans').hidden = !transacoes.length;
       const abertas = ativas().length;
       const eco = abertas - acertos.length;
       const ganhoPct = abertas > 0 ? Math.round((1 - acertos.length / abertas) * 100) : 0;
@@ -326,6 +347,20 @@
     /* ---------- Busca nas listas ---------- */
     $('buscaTrans').addEventListener('input', () => { filtroTrans = $('buscaTrans').value; render(); });
     $('buscaAcertos').addEventListener('input', () => { filtroAcertos = $('buscaAcertos').value; render(); });
+
+    /* ---------- Ordenar listas ---------- */
+    $('btnOrdenarTrans').addEventListener('click', () => OrdenarModal.abrir({
+      titulo: 'Ordenar Transações registradas',
+      opcoes: OPCOES_ORDEM,
+      atual: ordemTrans,
+      aoEscolher: v => { ordemTrans = v; render(); }
+    }));
+    $('btnOrdenarAcertos').addEventListener('click', () => OrdenarModal.abrir({
+      titulo: 'Ordenar Transações Mínimas',
+      opcoes: OPCOES_ORDEM,
+      atual: ordemAcertos,
+      aoEscolher: v => { ordemAcertos = v; render(); }
+    }));
 
     /* ---------- Ações da lista ---------- */
     $('listaTrans').addEventListener('click', e => {

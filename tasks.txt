@@ -8,6 +8,10 @@
 -- Transações registradas --
 ✅ add marcador de pago na tabela de transações registradas também, que faz com que aquela transferencia não entre mais na conta do saldo nem das transferencias minimas
 
+✅ buscar/filtrar na lista de transações registradas por nome (feito também na lista de transferencias mínimas, ignorando acentos)
+
+✅ ordenar a lista de transações registradas (por valor, nome ou mais recente) (feito também na lista de transferencias mínimas, via modal, padrão continua como está)
+
 -- Exemplo / dados padrão --
 ✅ coloque a lista de transferencias atual como a padrão na hora de carregar exemplo
 
@@ -21,10 +25,6 @@
 == NÃO FEITOS ==
 
 -- Transações registradas --
-buscar/filtrar na lista de transações registradas por nome
-
-ordenar a lista de transações registradas (por valor, nome ou mais recente)
-
 registrar a data em que uma transação foi marcada como paga
 
 -- Transações mínimas --

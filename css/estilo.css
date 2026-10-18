@@ -345,6 +345,39 @@
       background: rgba(61, 220, 151, .08)
     }
 
+    .btn.ordenar {
+      color: #ffd166;
+      border-color: rgba(255, 209, 102, .45);
+      background: rgba(255, 209, 102, .08)
+    }
+
+    .btn.ordenar:hover {
+      background: rgba(255, 209, 102, .18);
+      border-color: rgba(255, 209, 102, .7)
+    }
+
+    .btn.copiar {
+      color: #4dd4c8;
+      border-color: rgba(77, 212, 200, .45);
+      background: rgba(77, 212, 200, .08)
+    }
+
+    .btn.copiar:hover {
+      background: rgba(77, 212, 200, .18);
+      border-color: rgba(77, 212, 200, .7)
+    }
+
+    .btn.exportar {
+      color: #2ecc71;
+      border-color: rgba(46, 204, 113, .45);
+      background: rgba(46, 204, 113, .08)
+    }
+
+    .btn.exportar:hover {
+      background: rgba(46, 204, 113, .18);
+      border-color: rgba(46, 204, 113, .7)
+    }
+
     .btn.ajuda:hover {
       background: rgba(61, 220, 151, .18);
       border-color: rgba(61, 220, 151, .7)
@@ -920,12 +953,23 @@
       display: none
     }
 
-    .busca-lista {
+    .busca-linha {
+      display: flex;
+      gap: 8px;
       margin-bottom: 10px
     }
 
-    .busca-lista[hidden] {
+    .busca-linha[hidden] {
       display: none
+    }
+
+    .busca-linha .busca-lista {
+      flex: 1;
+      min-width: 0
+    }
+
+    .busca-linha .btn {
+      flex: none
     }
 
     /* Telas médias/pequenas: uma coluna, na ordem do fluxo de uso */

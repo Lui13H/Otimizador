@@ -110,12 +110,15 @@
             <p class="sub">O menor número de transferências que quita todas as dívidas.</p>
           </div>
           <div class="cab-acoes" id="cabAcoes" hidden>
-            <button class="btn" id="btnCopiar" type="button">Copiar Transações Mínimas</button>
-            <button class="btn" id="btnExportar" type="button">Exportar Excel</button>
+            <button class="btn copiar" id="btnCopiar" type="button">Copiar Transações Mínimas</button>
+            <button class="btn exportar" id="btnExportar" type="button">Exportar Excel</button>
           </div>
         </div>
-        <input type="search" class="busca-lista" id="buscaAcertos" placeholder="Buscar por nome..."
-          aria-label="Buscar nas Transações Mínimas por nome" hidden>
+        <div class="busca-linha" id="buscaLinhaAcertos" hidden>
+          <input type="search" class="busca-lista" id="buscaAcertos" placeholder="Buscar por nome..."
+            aria-label="Buscar nas Transações Mínimas por nome">
+          <button class="btn ordenar" id="btnOrdenarAcertos" type="button">Ordenar</button>
+        </div>
         <ul class="lista" id="listaAcertos"></ul>
         <div class="economia" id="economia" hidden></div>
       </section>
@@ -129,12 +132,15 @@
               Mínimas. Use o lápis para corrigir ou a lixeira para remover.</p>
           </div>
           <div class="cab-acoes" id="cabTransAcoes" hidden>
-            <button class="btn" id="btnCopiarTrans" type="button">Copiar Transações Registradas</button>
-            <button class="btn" id="btnExportarTrans" type="button">Exportar Excel</button>
+            <button class="btn copiar" id="btnCopiarTrans" type="button">Copiar Transações Registradas</button>
+            <button class="btn exportar" id="btnExportarTrans" type="button">Exportar Excel</button>
           </div>
         </div>
-        <input type="search" class="busca-lista" id="buscaTrans" placeholder="Buscar por nome..."
-          aria-label="Buscar nas Transações registradas por nome" hidden>
+        <div class="busca-linha" id="buscaLinhaTrans" hidden>
+          <input type="search" class="busca-lista" id="buscaTrans" placeholder="Buscar por nome..."
+            aria-label="Buscar nas Transações registradas por nome">
+          <button class="btn ordenar" id="btnOrdenarTrans" type="button">Ordenar</button>
+        </div>
         <ul class="lista" id="listaTrans"></ul>
       </section>
 
@@ -170,6 +176,7 @@
   <script src="js/interface/animacao.js"></script>
   <script src="js/interface/autocomplete.js"></script>
   <script src="js/interface/copiar.js"></script>
+  <script src="js/interface/ordenar.js"></script>
   <script src="js/interface/exportar.js"></script>
   <script src="js/interface/conta-conjunta.js"></script>
   <script src="js/dados/importar.js"></script>
