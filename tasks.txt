@@ -12,14 +12,16 @@
 
 ✅ ordenar a lista de transações registradas (por valor, nome ou mais recente) (feito também na lista de transferencias mínimas, via modal, padrão continua como está)
 
+-- Transações mínimas --
+✅ opção de copiar o resumo já formatado pra mandar no WhatsApp (terceira opção no modal de copiar, com *negrito* e emoji; o campo de colar também já entende esse formato de volta, inclusive o status de pago)
+
+✅ classificação se a otimização foi imperceptível, moderada, média, boa, ótima, impreensindível. De acordo com a % de diminuição da quantidade de transferencias da tabela de transferencias registradas e transferencias minimas
+
 -- Exemplo / dados padrão --
 ✅ coloque a lista de transferencias atual como a padrão na hora de carregar exemplo
 
 -- Layout --
 ✅ concerte o tamanho do card de transferencias minimas
-
--- Transações mínimas --
-✅ classificação se a otimização foi imperceptível, moderada, média, boa, ótima, impreensindível. De acordo com a % de diminuição da quantidade de transferencias da tabela de transferencias registradas e transferencias minimas
 
 
 == NÃO FEITOS ==
@@ -29,8 +31,6 @@ registrar a data em que uma transação foi marcada como paga
 
 -- Transações mínimas --
 permitir marcar uma transferência mínima como paga parcialmente (valor parcial)
-
-opção de copiar o resumo já formatado pra mandar no WhatsApp
 
 -- Pessoas / Saldos --
 tela ou card com estatísticas gerais (quem mais deve, quem mais recebe, maior transação)

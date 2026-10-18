@@ -2,9 +2,11 @@
  * copiar.js — Modal de escolha de formato ao copiar uma lista de transações
  * (parte puramente visual; não depende do algorithm.js)
  *
- * Mostra duas opções antes de copiar:
+ * Mostra três opções antes de copiar:
  *   - Copiador Intuitivo: frase clara ("Ana paga → Bruno recebe: R$ 50,00"),
  *     pronta pra colar numa mensagem.
+ *   - Copiador para WhatsApp: mesma ideia, mas com *negrito* e emoji,
+ *     já formatado do jeito que o WhatsApp renderiza.
  *   - Copiador Excel: colunas separadas por TAB (Paga/Valor/Recebe, sem
  *     cabeçalho), no mesmo formato que o Ctrl+V de uma planilha produz.
  *
@@ -13,6 +15,7 @@
  *     titulo: 'Copiar Transações Mínimas',
  *     qtd: acertos.length,
  *     textoIntuitivo: '...\n...',
+ *     textoWhatsapp: '...\n...',
  *     textoExcel: '...\n...'
  *   })
  */
@@ -39,6 +42,7 @@
 
     .cop-icone{flex:none;width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
       background:rgba(77,124,255,.18);color:var(--blue2)}
+    .cop-opcao[data-modo="whatsapp"] .cop-icone{background:rgba(37,211,102,.16);color:#25d366}
     .cop-opcao[data-modo="excel"] .cop-icone{background:rgba(61,220,151,.16);color:var(--pos)}
 
     .cop-texto{display:grid;gap:3px;min-width:0}
@@ -60,6 +64,7 @@
 
   const ICONE_FECHAR = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   const ICONE_INTUITIVO = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+  const ICONE_WHATSAPP = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1-1.3-.6-2.2-1.1-3-2.5-.2-.3 0-.5.1-.6.2-.2.4-.5.6-.7.1-.2.1-.4 0-.6-.1-.2-.6-1.4-.8-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9 1-.9 2.3 0 1.3 1 2.6 1.1 2.8.1.2 1.9 3 4.7 4.1 2.3.9 2.8.7 3.3.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2-.1-.1-.3-.2-.5-.3z"/></svg>';
   const ICONE_EXCEL = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>';
 
   let fundo = null, focoAnterior = null, opcoesAtuais = null;
@@ -84,6 +89,14 @@
               <strong>Copiador Intuitivo</strong>
               <small>Frase clara, pronta pra colar numa mensagem</small>
               <span class="cop-exemplo" id="copExIntuitivo"></span>
+            </span>
+          </button>
+          <button class="cop-opcao" type="button" data-modo="whatsapp">
+            <span class="cop-icone">${ICONE_WHATSAPP}</span>
+            <span class="cop-texto">
+              <strong>Copiar para WhatsApp</strong>
+              <small>Com *negrito* e emoji, pronto pra colar numa conversa</small>
+              <span class="cop-exemplo" id="copExWhatsapp"></span>
             </span>
           </button>
           <button class="cop-opcao" type="button" data-modo="excel">
@@ -121,17 +134,27 @@
     catch (e) { return false; }
   }
 
+  const TEXTO_POR_MODO = {
+    excel: o => o.textoExcel,
+    whatsapp: o => o.textoWhatsapp,
+    intuitivo: o => o.textoIntuitivo
+  };
+
+  const AVISO_POR_MODO = {
+    excel: t => `${t}: copiado no formato Excel. Cole numa planilha.`,
+    whatsapp: t => `${t}: copiado formatado pro WhatsApp. Cole na conversa.`,
+    intuitivo: t => `${t}: copiado. Cole onde quiser.`
+  };
+
   async function escolher(modo) {
     const opcoes = opcoesAtuais;
     if (!opcoes) return;
-    const texto = modo === 'excel' ? opcoes.textoExcel : opcoes.textoIntuitivo;
+    const texto = (TEXTO_POR_MODO[modo] || TEXTO_POR_MODO.intuitivo)(opcoes);
     const ok = await copiarTexto(texto);
     fechar();
     const avisar = msg => { if (typeof aviso === 'function') aviso(msg); };
     if (!ok) return avisar('Não foi possível copiar automaticamente.');
-    avisar(modo === 'excel'
-      ? `${opcoes.titulo}: copiado no formato Excel. Cole numa planilha.`
-      : `${opcoes.titulo}: copiado. Cole onde quiser.`);
+    avisar((AVISO_POR_MODO[modo] || AVISO_POR_MODO.intuitivo)(opcoes.titulo));
   }
 
   function fechar() {
@@ -150,6 +173,8 @@
     fundo.querySelector('#copTitulo').textContent = opcoes.titulo;
     fundo.querySelector('#copSub').textContent = `${n} ${n === 1 ? 'transação' : 'transações'}. Escolha o formato para copiar:`;
     fundo.querySelector('#copExIntuitivo').textContent = opcoes.textoIntuitivo.split('\n')[0] || '';
+    const linhasWhatsapp = opcoes.textoWhatsapp.split('\n');
+    fundo.querySelector('#copExWhatsapp').textContent = linhasWhatsapp.find(l => l.trim().startsWith('•')) || linhasWhatsapp.find(l => l.trim()) || '';
     fundo.querySelector('#copExExcel').innerHTML = celulasExcel(opcoes.textoExcel.split('\n')[0] || '');
 
     fundo.hidden = false;

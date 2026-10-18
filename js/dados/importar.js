@@ -3,8 +3,9 @@
  * (parte visual; só LÊ o algorithm.js — via otimizarTransacoesMatriz — para conferir
  * a tabela de Transações Mínimas colada junto. Nunca altera o algorithm.js.)
  *
- * Formatos de texto reconhecidos (um por linha):
- *   1) Resumo do botão "Copiar resumo":      Ana → Bruno: R$ 120,00
+ * Formatos de texto reconhecidos (um por linha; o marcador de "já pago" é opcional em 1 e 1b):
+ *   1) Resumo do botão "Copiar resumo":      Ana paga → Bruno recebe: R$ 120,00 (pago)
+ *   1b) Resumo do "Copiar para WhatsApp":    • *Ana* paga *Bruno*: R$ 120,00 ✅ pago
  *   2) Tabela do Excel (colunas por TAB):    Paga ⇥ Valor ⇥ Recebe   (com ou sem a linha de cabeçalho)
  *   3) Texto simples "Pagador Recebedor Valor":   João Arthur LuisH 9,00
  *   4) Texto simples "Pagador Valor Recebedor":   João Arthur 9,00 LuisH
@@ -98,8 +99,12 @@
     return neg ? -n : n;
   }
 
-  // "Ana → Bruno: R$ 120,00"  (também ->, =>, -->, ➜)
-  const SETA = /^\s*(.+?)\s*(?:→|->|-->|=>|➜|➔|➡)\s*(.+?)\s*[:=\-–]\s*(?:R\$\s*)?([-−]?[\d.,]+)\s*$/;
+  // "Ana → Bruno: R$ 120,00" ou "Ana paga → Bruno recebe: R$ 120,00 (pago)" (também ->, =>, -->, ➜)
+  const SETA = /^\s*(.+?)\s*(?:→|->|-->|=>|➜|➔|➡)\s*(.+?)\s*[:=\-–]\s*(?:R\$\s*)?([-−]?[\d.,]+)\s*(?:\(?\s*(pago)\s*\)?)?\s*$/i;
+
+  // Formato do "Copiar para WhatsApp": "Ana paga Bruno: R$ 120,00" ou "Ana deve Bruno: R$ 120,00 ✅ pago"
+  // (o *negrito* e o • de lista já foram removidos da linha antes de chegar aqui)
+  const PAGA_DEVE = /^\s*(.+?)\s+(?:paga|deve)\s+(.+?)\s*:\s*(?:R\$\s*)?([-−]?[\d.,]+)\s*(✅\s*pago|✅|pago)?\s*$/i;
 
   function detectarCabecalho(celulas) {
     const n = celulas.map(norm);
@@ -283,12 +288,16 @@
     const certa = (p, r, v, origem, pago) => itens.push({ tipo: 'certa', p: String(p || '').trim(), r: String(r || '').trim(), v: v, pago: !!pago, origem: origem });
 
     String(texto).split(/\r?\n/).forEach(bruta => {
-      const l = bruta.replace(/\u00a0/g, ' ').trim();
+      const l = bruta.replace(/\u00a0/g, ' ').replace(/^[\u2022\u25aa\u25cf]\s*/, '').replace(/\*/g, '').trim();
       if (!l) return;
 
-      // 1) Resumo com seta
+      // 1) Resumo com seta (tira "paga"/"recebe" do fim do nome, que o "Copiador Intuitivo" adiciona)
       const m = l.match(SETA);
-      if (m) return certa(m[1], m[2], lerValor(m[3]), l);
+      if (m) return certa(m[1].replace(/\s+paga$/i, ''), m[2].replace(/\s+recebe$/i, ''), lerValor(m[3]), l, !!m[4]);
+
+      // 1b) Resumo do "Copiar para WhatsApp": "Ana paga Bruno: R$ 120,00" / "... \u2705 pago"
+      const mw = l.match(PAGA_DEVE);
+      if (mw) return certa(mw[1], mw[2], lerValor(mw[3]), l, !!mw[4]);
 
       // 2) Colunas separadas por TAB (Excel) ou ";" (CSV)
       const sep = l.includes('\t') ? '\t' : (l.split(';').length >= 3 ? ';' : null);
