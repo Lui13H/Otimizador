@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Otimizador de Transações</title>
+  <script>try { document.documentElement.dataset.theme = localStorage.getItem('otimizador-tema') === 'claro' ? 'light' : 'dark' } catch (e) { }</script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -24,6 +25,8 @@
         <button class="btn alternar" id="btnAnimacao" type="button" role="switch" aria-checked="true"><span
             class="chave" aria-hidden="true"></span>Mostrar animação</button>
         <button class="btn" id="btnExemplo" type="button">Carregar exemplo</button>
+        <button class="btn alternar" id="btnTema" type="button" role="switch" aria-checked="true"><span
+            class="chave" aria-hidden="true"></span>Tema escuro</button>
         <button class="btn perigo" id="btnLimpar" type="button">Reiniciar</button>
       </div>
     </header>
@@ -147,6 +150,10 @@
       <section class="panel p-saldos">
         <h2>Saldo de cada pessoa</h2>
         <p class="sub">Quem tem a receber aparece em verde e quem deve pagar, em vermelho.</p>
+        <div class="estatisticas" id="estatisticas" hidden>
+          <div class="stat"><span class="stat-rotulo">Quem mais deve</span><span class="stat-valor neg" id="statMaisDeve"></span></div>
+          <div class="stat"><span class="stat-rotulo">Quem mais recebe</span><span class="stat-valor pos" id="statMaisRecebe"></span></div>
+        </div>
         <ul class="lista" id="listaSaldos"></ul>
       </section>
     </main>
@@ -173,6 +180,7 @@
 
   <!-- Seu algoritmo original, sem nenhuma alteração -->
   <script src="js/nucleo/algorithm.js"></script>
+  <script src="js/interface/tema.js"></script>
   <script src="js/interface/animacao.js"></script>
   <script src="js/interface/autocomplete.js"></script>
   <script src="js/interface/copiar.js"></script>

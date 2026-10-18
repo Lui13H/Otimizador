@@ -9,10 +9,62 @@
       --neg: #ff7a90;
       --grupo: #b985ff;
       --glass: linear-gradient(160deg, rgba(20, 34, 76, .72), rgba(8, 14, 34, .86));
+      --item-bg: rgba(8, 14, 36, .6);
+      --input-bg: rgba(4, 8, 22, .7);
       --gap: 20px;
       --radius: 20px;
       --card-max: 520px;
       font-family: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    }
+
+    /* Tema claro: troca só a paleta (--bg/--txt/--mut/--line/--glass e os tons de
+       destaque, escurecidos pra manter contraste em fundo claro). O resto do CSS
+       usa essas variáveis, então se adapta sozinho. */
+    :root[data-theme="light"] {
+      --bg: #eef1fa;
+      --line: rgba(60, 90, 180, .18);
+      --txt: #1c2440;
+      --mut: #5c6690;
+      --blue: #3a63e6;
+      --blue2: #2f55c9;
+      --pos: #1a9d5a;
+      --neg: #e23b56;
+      --grupo: #8b4fe0;
+      --glass: linear-gradient(160deg, rgba(255, 255, 255, .88), rgba(234, 238, 250, .94));
+      --item-bg: rgba(255, 255, 255, .7);
+      --input-bg: rgba(255, 255, 255, .75);
+    }
+
+    /* Elementos que são sempre "escuros" por design, mesmo no tema claro
+       (modais e o toast flutuante): fixamos aqui as variáveis de volta pro
+       valor escuro, só dentro deles, pra nenhum texto ficar ilegível (escuro
+       sobre escuro). Os cards de destaque (Transações registradas e
+       Transações Mínimas) NÃO entram aqui — eles seguem o tema normalmente,
+       só com uma cor de fundo própria por tema (ver mais abaixo). */
+    .modal,
+    #toast,
+    .cop-modal,
+    .ord-modal,
+    .imp-modal,
+    .exp-modal,
+    .dc-modal,
+    .anim-modal {
+      /* "color" é propriedade herdada: sem redeclará-la aqui, os filhos que
+         não têm cor própria herdariam o "color" já calculado lá no body
+         (com o --txt do tema atual, não o fixado acima) */
+      color: var(--txt);
+      --bg: #040814;
+      --line: rgba(120, 150, 255, .16);
+      --txt: #e9eeff;
+      --mut: #8c99bd;
+      --blue: #4d7cff;
+      --blue2: #8fb0ff;
+      --pos: #3ddc97;
+      --neg: #ff7a90;
+      --grupo: #b985ff;
+      --glass: linear-gradient(160deg, rgba(20, 34, 76, .72), rgba(8, 14, 34, .86));
+      --item-bg: rgba(8, 14, 36, .6);
+      --input-bg: rgba(4, 8, 22, .7);
     }
 
     * {
@@ -242,7 +294,7 @@
     label {
       font-size: .8rem;
       font-weight: 600;
-      color: #b9c5e8
+      color: var(--mut)
     }
 
     input {
@@ -250,7 +302,7 @@
       padding: 11px 13px;
       border-radius: 12px;
       border: 1px solid var(--line);
-      background: rgba(4, 8, 22, .7);
+      background: var(--input-bg);
       color: var(--txt);
       font: inherit;
       font-size: .92rem
@@ -317,6 +369,7 @@
     .btn.primario {
       background: linear-gradient(135deg, #5b86ff, #3a63e6);
       border-color: transparent;
+      color: #fff;
       box-shadow: 0 8px 24px -10px rgba(77, 124, 255, .9)
     }
 
@@ -383,6 +436,62 @@
       border-color: rgba(61, 220, 151, .7)
     }
 
+    /* No tema escuro, texto claro + fundo bem transparente já contrasta bem
+       sozinho. No tema claro isso fica apagado — então esses botões viram
+       "pílulas" preenchidas (cor sólida + texto branco), igual ao botão
+       primário, pra continuarem se destacando. */
+    :root[data-theme="light"] .btn.grupo,
+    :root[data-theme="light"] .btn.ajuda,
+    :root[data-theme="light"] .btn.ordenar,
+    :root[data-theme="light"] .btn.copiar,
+    :root[data-theme="light"] .btn.exportar,
+    :root[data-theme="light"] .btn.perigo {
+      color: #fff;
+      border-color: transparent;
+      transition: background .15s, filter .15s
+    }
+
+    :root[data-theme="light"] .btn.grupo {
+      background: #8b4fe0
+    }
+
+    :root[data-theme="light"] .btn.ajuda {
+      background: #0a8a5e
+    }
+
+    :root[data-theme="light"] .btn.ordenar {
+      background: #9c6508
+    }
+
+    :root[data-theme="light"] .btn.copiar {
+      background: #1a8578
+    }
+
+    :root[data-theme="light"] .btn.exportar {
+      background: #1d6f42
+    }
+
+    :root[data-theme="light"] .btn.perigo {
+      background: #e23b56
+    }
+
+    :root[data-theme="light"] .btn.grupo:hover,
+    :root[data-theme="light"] .btn.ajuda:hover,
+    :root[data-theme="light"] .btn.ordenar:hover,
+    :root[data-theme="light"] .btn.copiar:hover,
+    :root[data-theme="light"] .btn.exportar:hover,
+    :root[data-theme="light"] .btn.perigo:hover {
+      filter: brightness(1.12)
+    }
+
+    /* A "chavinha" (Mostrar animação / Tema escuro) tem a trilha desligada em
+       branco bem transparente (css injetado por animacao.js) — some no tema
+       claro, sobre um botão também claro. Essa regra tem mais especificidade
+       que a de lá, então vence independente da ordem de carregamento. */
+    :root[data-theme="light"] .btn.alternar .chave {
+      background: rgba(70, 90, 160, .3)
+    }
+
     .linha-btns {
       grid-column: 1/-1;
       display: flex;
@@ -427,7 +536,7 @@
       gap: 12px;
       padding: 11px 13px;
       border-radius: 14px;
-      background: rgba(8, 14, 36, .6);
+      background: var(--item-bg);
       border: 1px solid var(--line);
       font-size: .9rem
     }
@@ -707,13 +816,27 @@
       border-color: rgba(150, 170, 220, .16)
     }
 
+    :root[data-theme="light"] .panel.p-trans {
+      background: linear-gradient(160deg, rgba(255, 255, 255, .92), rgba(232, 236, 248, .96));
+      border-color: rgba(60, 90, 180, .16)
+    }
+
     .p-trans li.item {
       background: rgba(255, 255, 255, .04);
       border-color: rgba(170, 190, 235, .12)
     }
 
+    :root[data-theme="light"] .p-trans li.item {
+      background: rgba(10, 20, 50, .035);
+      border-color: rgba(60, 90, 180, .14)
+    }
+
     .p-trans li.item:hover {
       background: rgba(255, 255, 255, .07)
+    }
+
+    :root[data-theme="light"] .p-trans li.item:hover {
+      background: rgba(10, 20, 50, .07)
     }
 
     /* Transações Mínimas: azul vivo (resultado final, em destaque) */
@@ -723,14 +846,25 @@
       box-shadow: 0 0 0 1px rgba(100, 150, 255, .25), 0 30px 90px -25px rgba(60, 110, 255, .75)
     }
 
+    :root[data-theme="light"] .panel.resultado {
+      background: linear-gradient(160deg, rgba(222, 232, 255, .95), rgba(199, 215, 253, .9));
+      border-color: rgba(90, 130, 230, .45);
+      box-shadow: 0 0 0 1px rgba(90, 130, 230, .18), 0 30px 90px -25px rgba(90, 130, 230, .4)
+    }
+
     .resultado li.item {
       padding: 14px;
       background: linear-gradient(135deg, rgba(90, 140, 255, .30), rgba(40, 72, 190, .20));
       border-color: rgba(140, 180, 255, .45)
     }
 
+    :root[data-theme="light"] .resultado li.item {
+      background: linear-gradient(135deg, rgba(255, 255, 255, .75), rgba(255, 255, 255, .42));
+      border-color: rgba(90, 130, 230, .3)
+    }
+
     .resultado .sub {
-      color: #aebfee
+      color: var(--mut)
     }
 
     /* Confirmação de pagamento */
@@ -778,7 +912,7 @@
     }
 
     .pago .acerto .nome {
-      color: #a9e9cd
+      color: var(--pos)
     }
 
     .pago .acerto .seta {
@@ -869,6 +1003,7 @@
     .btn.confirmar-exclusao {
       background: linear-gradient(135deg, #ff6b84, #d93a58);
       border-color: transparent;
+      color: #fff;
       box-shadow: 0 8px 24px -10px rgba(255, 107, 132, .8)
     }
 
@@ -953,6 +1088,55 @@
       display: none
     }
 
+    .estatisticas {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .estatisticas[hidden] {
+      display: none
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 4px;
+      min-width: 0;
+      padding: 10px 13px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line)
+    }
+
+    .stat-rotulo {
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      color: var(--mut)
+    }
+
+    .stat-valor {
+      font-size: .86rem;
+      font-weight: 700;
+      color: var(--txt);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .stat-valor.pos {
+      color: var(--pos)
+    }
+
+    .stat-valor.neg {
+      color: var(--neg)
+    }
+
     .busca-linha {
       display: flex;
       gap: 8px;
@@ -1023,6 +1207,10 @@
         border-right: 0;
         border-bottom: 1px solid var(--line)
       }
+
+      .estatisticas {
+        grid-template-columns: 1fr
+      }
     }
 
     @media (prefers-reduced-motion:reduce) {
@@ -1038,5 +1226,5 @@
     }
 
     .pago .txt strong {
-      color: #a9e9cd
+      color: var(--pos)
     }

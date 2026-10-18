@@ -205,6 +205,14 @@
         <div class="barra"><i style="width:${Math.abs(p.saldo) / max * 100}%;background:${cor}"></i></div>
       </div></li>`;
       }).join('') : `<li class="vazio">Os saldos aparecem aqui depois da primeira transação.</li>`;
+
+      $('estatisticas').hidden = !transacoes.length;
+      if (transacoes.length) {
+        const maisRecebe = saldos[0] && saldos[0].saldo > 0 ? saldos[0] : null;
+        const maisDeve = saldos[saldos.length - 1] && saldos[saldos.length - 1].saldo < 0 ? saldos[saldos.length - 1] : null;
+        $('statMaisDeve').textContent = maisDeve ? `${maisDeve.nome} · ${brl(Math.abs(maisDeve.saldo))}` : '—';
+        $('statMaisRecebe').textContent = maisRecebe ? `${maisRecebe.nome} · ${brl(maisRecebe.saldo)}` : '—';
+      }
     }
 
     /* ---------- Formulário ---------- */

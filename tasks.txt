@@ -23,19 +23,20 @@
 -- Layout --
 ✅ concerte o tamanho do card de transferencias minimas
 
+-- Pessoas / Saldos --
+✅ tela ou card com estatísticas gerais (quem mais deve, quem mais recebe) — dentro do card de Saldo de cada pessoa
+
+-- Interface --
+✅ alternar entre tema claro e escuro (botão no header, igual a chave de "Mostrar animação"; auditei o site inteiro nos dois temas pra garantir contraste em cards, modais, inputs e botões)
+
 
 == NÃO FEITOS ==
-
--- Transações registradas --
-registrar a data em que uma transação foi marcada como paga
 
 -- Transações mínimas --
 permitir marcar uma transferência mínima como paga parcialmente (valor parcial)
 
 -- Pessoas / Saldos --
-tela ou card com estatísticas gerais (quem mais deve, quem mais recebe, maior transação)
-
 suportar mais de um grupo/rateio separado (ex.: viagem e república em listas distintas)
 
--- Interface --
-alternar entre tema claro e escuro
+-- Transações registradas --
+🤷 registrar a data em que uma transação foi marcada como paga
