@@ -1,0 +1,11 @@
+ao exportal excel dar opcao se quer exportar tudo ou apenas as transferencias nao confirmadas OK
+
+se for mandada trabsfereencias pagas aparever mais uma coluna com o status pago (sim ou não) OK
+
+add marcador de pago na tabela de transações registradas também, que faz com que aquela transferencia não entre mais na conta do saldo nem das transferencias minimas
+
+coloque a lista de transferencias atual como a padrão na hora de carregar exemplo
+
+concerte o tamanho do card de transferencias minimas e também a margem de alguns objetos na pagina de documentação
+
+classificação se a otimização foi imperceptível, moderada, média, boa, ótima, impreensindível. De acordo com a % de diminuição da quantidade de transferencias da tabela de transferencias registradas e transferencias minimas

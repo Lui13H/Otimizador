@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otimizador de Transações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div>
+        <h1>Otimizador de Transações</h1>
+        <p>Registre quem deve a quem. O sistema calcula o menor número de transferências para acertar todo mundo.</p>
+      </div>
+      <div class="acoes">
+        <a class="btn" href="documentacao.html">Como usar</a>
+        <button class="btn alternar" id="btnAnimacao" type="button" role="switch" aria-checked="true"><span
+            class="chave" aria-hidden="true"></span>Mostrar animação</button>
+        <button class="btn" id="btnExemplo" type="button">Carregar exemplo</button>
+        <button class="btn perigo" id="btnLimpar" type="button">Reiniciar</button>
+      </div>
+    </header>
+
+    <section class="panel resumo" aria-label="Resumo">
+      <div><b id="sTrans">0</b><span>transações registradas</span></div>
+      <div><b id="sPessoas">0</b><span>pessoas envolvidas</span></div>
+      <div class="dest"><b id="sAcertos">0</b><span>transferências para quitar tudo</span></div>
+    </section>
+
+    <main class="grade">
+      <section class="panel p-form">
+        <h2><span class="passo">1</span><span id="tituloForm">Registrar transação</span></h2>
+        <p class="sub">Informe quem deve pagar, quanto, e para quem. Ou cole aqui um resumo copiado para importar várias
+          de uma vez.</p>
+        <form id="form" autocomplete="off" novalidate>
+          <div class="campo">
+            <div class="rotulo-linha">
+              <label for="pagador">Pagador (quem deve)</label>
+              <button class="pin" type="button" data-pin="pagador" aria-pressed="false" aria-label="Fixar pagador"
+                title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 17v5" />
+                  <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+                </svg></button>
+            </div>
+            <input id="pagador" required placeholder="Ex.: Ana">
+          </div>
+          <div class="campo">
+            <div class="rotulo-linha">
+              <label for="recebedor">Recebedor</label>
+              <button class="pin" type="button" data-pin="recebedor" aria-pressed="false" aria-label="Fixar recebedor"
+                title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 17v5" />
+                  <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+                </svg></button>
+            </div>
+            <input id="recebedor" required placeholder="Ex.: Bruno">
+          </div>
+          <div class="campo larga">
+            <div class="rotulo-linha">
+              <label for="valor">Valor (R$)</label>
+              <button class="pin" type="button" data-pin="valor" aria-pressed="false" aria-label="Fixar valor"
+                title="Fixar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 17v5" />
+                  <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+                </svg></button>
+            </div>
+            <input id="valor" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="0,00">
+          </div>
+          <div class="previa" id="previa" aria-live="polite">Preencha os campos para ver o resumo da transação.</div>
+
+          <div class="lote-bloco">
+            <p class="lote-titulo">Adicionar em lote</p>
+
+            <div class="lote-item">
+              <button class="btn grupo" id="btnDividirConta" type="button">Adicionar conta em grupo</button>
+              <span>Uma pessoa paga, e o valor é repartido entre quem participou</span>
+            </div>
+
+            <div class="importar-bloco">
+              <label for="colar">Colar um resumo ou uma tabela do Excel</label>
+              <input id="colar" class="colar" placeholder="Clique aqui e cole (Ctrl+V) um resumo ou uma tabela do Excel"
+                aria-describedby="colarAjuda">
+              <div class="importar-linha">
+                <button class="btn" id="btnImportarExcel" type="button">Importar arquivo Excel</button>
+                <span id="colarAjuda">ou arraste um arquivo .xlsx para o campo acima</span>
+              </div>
+              <input type="file" id="arquivoExcel" accept=".xlsx,.xlsm,.csv,.tsv,.txt" hidden>
+            </div>
+          </div>
+
+          <div class="erro" id="erro" role="alert"></div>
+          <div class="linha-btns">
+            <button class="btn primario" id="btnSalvar" type="submit">Adicionar transação</button>
+            <button class="btn" id="btnCancelar" type="button" hidden>Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel resultado p-result">
+        <div class="cab">
+          <div>
+            <h2><span class="passo">2</span>Transações Mínimas</h2>
+            <p class="sub">O menor número de transferências que quita todas as dívidas.</p>
+          </div>
+          <div class="cab-acoes" id="cabAcoes" hidden>
+            <button class="btn" id="btnCopiar" type="button">Copiar Transações Mínimas</button>
+            <button class="btn" id="btnExportar" type="button">Exportar Excel</button>
+          </div>
+        </div>
+        <ul class="lista" id="listaAcertos"></ul>
+        <div class="economia" id="economia" hidden></div>
+      </section>
+
+      <section class="panel p-trans">
+        <div class="cab">
+          <div>
+            <h2>Transações registradas</h2>
+            <!-- <p class="sub">Use o lápis para corrigir ou a lixeira para remover.</p> -->
+            <p class="sub">Marque a caixinha quando uma transação já foi paga: ela sai dos saldos e das Transações
+              Mínimas. Use o lápis para corrigir ou a lixeira para remover.</p>
+          </div>
+          <div class="cab-acoes" id="cabTransAcoes" hidden>
+            <button class="btn" id="btnCopiarTrans" type="button">Copiar Transações Registradas</button>
+            <button class="btn" id="btnExportarTrans" type="button">Exportar Excel</button>
+          </div>
+        </div>
+        <ul class="lista" id="listaTrans"></ul>
+      </section>
+
+      <section class="panel p-saldos">
+        <h2>Saldo de cada pessoa</h2>
+        <p class="sub">Quem tem a receber aparece em verde e quem deve pagar, em vermelho.</p>
+        <ul class="lista" id="listaSaldos"></ul>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" role="status"><span id="toastMsg"></span><button id="toastBtn" type="button" hidden></button></div>
+
+  <div class="modal-fundo" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitulo" aria-describedby="modalTexto">
+      <button class="modal-fechar" id="modalX" type="button" aria-label="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round">
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+      <h3 id="modalTitulo">Excluir transação?</h3>
+      <p id="modalTexto"></p>
+      <div class="modal-botoes">
+        <button class="btn" id="modalCancelar" type="button">Cancelar</button>
+        <button class="btn primario confirmar-exclusao" id="modalConfirmar" type="button">Confirmar exclusão</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Seu algoritmo original, sem nenhuma alteração -->
+  <script src="js/nucleo/algorithm.js"></script>
+  <script src="js/interface/animacao.js"></script>
+  <script src="js/interface/autocomplete.js"></script>
+  <script src="js/interface/copiar.js"></script>
+  <script src="js/interface/exportar.js"></script>
+  <script src="js/interface/conta-conjunta.js"></script>
+  <script src="js/dados/importar.js"></script>
+  <script src="js/dados/excel.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

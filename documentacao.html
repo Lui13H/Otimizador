@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Como usar — Otimizador de Transações</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/estilo.css">
+  <style>
+    /* Esta página reaproveita css/estilo.css (mesmas cores, fontes, botões, chips,
+       itens de lista, selos de conferência) pra que os exemplos aqui dentro fiquem
+       idênticos ao site de verdade e continuem iguais automaticamente se o visual
+       do site mudar. Os widgets interativos também reaproveitam o código de
+       verdade (algorithm.js e importar.js, carregados como <script> no fim da
+       página) — não são cópias fingidas, é a mesma lógica rodando aqui. O que vem
+       abaixo é só o necessário pra montar a página de documentação em si. */
+
+    body {
+      max-width: 980px;
+      margin: 0 auto;
+      padding-bottom: 80px
+    }
+
+    .doc-nav {
+      position: sticky;
+      top: 0;
+      z-index: 15;
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding: 14px 20px;
+      margin: 0 -20px 32px;
+      background: rgba(4, 8, 20, .88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      scrollbar-width: none
+    }
+
+    .doc-nav::-webkit-scrollbar {
+      display: none
+    }
+
+    .doc-nav a {
+      flex: none;
+      padding: 7px 13px;
+      border-radius: 99px;
+      font-size: .78rem;
+      font-weight: 600;
+      color: var(--mut);
+      text-decoration: none;
+      border: 1px solid transparent;
+      white-space: nowrap;
+      transition: background .15s, color .15s, border-color .15s
+    }
+
+    .doc-nav a:hover {
+      background: rgba(255, 255, 255, .06);
+      color: var(--txt)
+    }
+
+    .doc-nav a.ativo {
+      background: rgba(77, 124, 255, .18);
+      border-color: rgba(120, 150, 255, .4);
+      color: var(--blue2)
+    }
+
+    .doc-hero {
+      padding: 36px 32px;
+      text-align: center;
+      display: grid;
+      gap: 14px;
+      justify-items: center
+    }
+
+    .doc-hero .eyebrow {
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--blue2)
+    }
+
+    .doc-hero h1 {
+      font-size: clamp(1.7rem, 4vw, 2.3rem);
+      font-weight: 800;
+      letter-spacing: -.02em;
+      max-width: 36ch
+    }
+
+    .doc-hero p {
+      color: var(--mut);
+      max-width: 46ch;
+      line-height: 1.6
+    }
+
+    .doc-hero .acoes {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 6px
+    }
+
+    section.doc {
+      scroll-margin-top: 76px;
+      margin-bottom: 28px
+    }
+
+    section.doc .passo {
+      width: 30px;
+      height: 30px;
+      border-radius: 10px;
+      font-size: .85rem
+    }
+
+    section.doc h2 {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 1.2rem
+    }
+
+    section.doc .sub {
+      margin: 10px 0 18px;
+      font-size: .92rem;
+      max-width: 62ch
+    }
+
+    .doc-bloco {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px
+    }
+
+    .doc-bloco:first-of-type {
+      margin-top: 0
+    }
+
+    .doc-bloco h3 {
+      font-size: .95rem;
+      font-weight: 700;
+      color: var(--txt);
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .doc-bloco p {
+      color: var(--mut);
+      font-size: .88rem;
+      line-height: 1.65;
+      margin-top: 6px
+    }
+
+    .doc-bloco p strong,
+    .doc-dica strong {
+      color: var(--txt);
+      font-weight: 700
+    }
+
+    kbd {
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      font-size: .76rem;
+      font-weight: 700;
+      color: var(--txt);
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .18);
+      border-bottom-width: 2px;
+      border-radius: 6px;
+      padding: 1px 7px;
+      white-space: nowrap
+    }
+
+    .doc-exemplo {
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .03);
+      border: 1px solid var(--line);
+      font-size: .84rem
+    }
+
+    .doc-grade2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px
+    }
+
+    .doc-mono-caixa {
+      position: relative
+    }
+
+    .doc-mono {
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      font-size: .8rem;
+      color: var(--blue2);
+      background: rgba(77, 124, 255, .08);
+      border: 1px solid rgba(120, 150, 255, .25);
+      border-radius: 10px;
+      padding: 10px 40px 10px 12px;
+      overflow-x: auto;
+      white-space: pre;
+      cursor: pointer;
+      transition: border-color .15s, background .15s
+    }
+
+    .doc-mono:hover {
+      border-color: rgba(120, 150, 255, .55);
+      background: rgba(77, 124, 255, .13)
+    }
+
+    .doc-mono-copiado {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--pos);
+      opacity: 0;
+      transition: opacity .2s;
+      pointer-events: none
+    }
+
+    .doc-mono-copiado.on {
+      opacity: 1
+    }
+
+    .doc-mono-dica {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      font-size: .62rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      color: rgba(143, 176, 255, .55);
+      pointer-events: none
+    }
+
+    .doc-dica {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(61, 220, 151, .08);
+      border: 1px solid rgba(61, 220, 151, .25);
+      font-size: .82rem;
+      color: #bfe9d2;
+      line-height: 1.5
+    }
+
+    .doc-dica b {
+      color: var(--pos)
+    }
+
+    .doc-chips-demo {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px
+    }
+
+    .doc-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px 6px 12px;
+      border-radius: 99px;
+      background: rgba(77, 124, 255, .16);
+      border: 1px solid rgba(120, 150, 255, .4);
+      font-size: .84rem;
+      color: var(--txt)
+    }
+
+    .doc-chip button {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      border: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .12);
+      color: inherit;
+      font-size: .68rem;
+      cursor: pointer;
+      font: inherit
+    }
+
+    .doc-chip button:hover {
+      background: rgba(255, 122, 144, .35);
+      color: var(--neg)
+    }
+
+    .doc-chip-sugestao {
+      background: transparent;
+      border-style: dashed;
+      border-color: rgba(140, 170, 255, .5);
+      color: var(--blue2);
+      cursor: pointer;
+      padding: 6px 12px;
+      font: inherit
+    }
+
+    .doc-widget {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 14px;
+      background: rgba(77, 124, 255, .06);
+      border: 1px dashed rgba(120, 150, 255, .35)
+    }
+
+    .doc-widget-titulo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--blue2)
+    }
+
+    .doc-widget-titulo svg {
+      flex: none
+    }
+
+    .doc-widget-linha {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap
+    }
+
+    .doc-widget-linha label {
+      font-size: .8rem;
+      color: var(--mut);
+      font-weight: 600
+    }
+
+    .doc-widget input:not([type=checkbox]) {
+      width: 110px;
+      padding: 8px 10px;
+      font-size: .86rem
+    }
+
+    .doc-widget input.doc-input-nome {
+      width: 150px
+    }
+
+    .doc-widget textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(8, 14, 36, .6);
+      color: var(--txt);
+      font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+      font-size: .78rem;
+      line-height: 1.55;
+      resize: vertical
+    }
+
+    .doc-widget textarea:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 1px
+    }
+
+    .doc-resultado {
+      font-size: .86rem;
+      color: var(--blue2);
+      line-height: 1.6
+    }
+
+    .doc-resultado strong {
+      color: var(--txt)
+    }
+
+    .doc-resultado.doc-resultado-aviso {
+      color: #f3d28a
+    }
+
+    .doc-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap
+    }
+
+    .doc-tab {
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, .03);
+      color: var(--mut);
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      font: inherit
+    }
+
+    .doc-tab.ativa {
+      background: rgba(77, 124, 255, .16);
+      border-color: rgba(120, 150, 255, .5);
+      color: var(--blue2)
+    }
+
+    .doc-tab-painel[hidden] {
+      display: none
+    }
+
+    .doc-lista-demo {
+      max-height: 230px
+    }
+
+    .doc-lista-demo .vazio {
+      padding: 16px;
+      color: var(--mut);
+      font-size: .82rem;
+      text-align: center
+    }
+
+    .doc-badge {
+      font-size: .66rem;
+      font-weight: 700;
+      letter-spacing: .03em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 99px
+    }
+
+    .doc-badge.azul {
+      color: var(--blue2);
+      background: rgba(77, 124, 255, .16)
+    }
+
+    .doc-badge.roxo {
+      color: var(--grupo);
+      background: rgba(185, 133, 255, .16)
+    }
+
+    .doc-badge.verde {
+      color: var(--pos);
+      background: rgba(61, 220, 151, .14)
+    }
+
+    .doc-iframe-caixa {
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      box-shadow: 0 30px 80px -30px rgba(0, 0, 0, .8)
+    }
+
+    .doc-iframe-caixa iframe {
+      display: block;
+      width: 100%;
+      height: 760px;
+      border: 0;
+      background: var(--bg)
+    }
+
+    .doc-rodape {
+      text-align: center;
+      color: var(--mut);
+      font-size: .8rem;
+      padding-top: 24px;
+      line-height: 1.6
+    }
+
+    .doc-rodape a {
+      color: var(--blue2)
+    }
+
+    @media (max-width: 760px) {
+      .doc-grade2 {
+        grid-template-columns: 1fr
+      }
+
+      .doc-iframe-caixa iframe {
+        height: 620px
+      }
+    }
+
+    /* Abaixo de 520px o body do site (css/estilo.css) muda o padding lateral
+       de 20px pra 14px — a barra de navegação precisa acompanhar, senão sangra
+       além da borda da tela e causa rolagem horizontal. */
+    @media (max-width: 520px) {
+      .doc-nav {
+        margin: 0 -14px 32px;
+        padding: 14px
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto
+      }
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="doc-nav" id="docNav" aria-label="Seções desta página">
+    <a href="#inicio">Início</a>
+    <a href="#registrar">Registrar transação</a>
+    <a href="#fixar">Fixar campos</a>
+    <a href="#grupo">Conta em grupo</a>
+    <a href="#colar">Colar / importar</a>
+    <a href="#multitabela">Várias tabelas</a>
+    <a href="#minimas">Transações Mínimas</a>
+    <a href="#pago">Marcar como pago</a>
+    <a href="#registradas">Transações registradas</a>
+    <a href="#saldos">Saldo de cada pessoa</a>
+    <a href="#copiar">Copiar</a>
+    <a href="#exportar">Exportar Excel</a>
+    <a href="#topo">Exemplo / Reiniciar</a>
+    <a href="#dados">Seus dados</a>
+    <a href="#experimente">Experimente ao vivo</a>
+  </nav>
+
+  <header class="doc-hero panel" id="inicio">
+    <span class="eyebrow">Documentação</span>
+    <h1>Tudo que o Otimizador de Transações sabe fazer</h1>
+    <p>Um guia completo, com <strong>exemplos reais</strong> e <strong>testes que você mesmo pode mexer</strong>, de
+      cada funcionalidade do site — da transação única até a divisão de conta em grupo e a leitura de planilhas do
+      Excel.</p>
+    <div class="acoes">
+      <a class="btn primario" href="index.html">Abrir o site</a>
+      <a class="btn" href="#experimente">Experimentar aqui embaixo</a>
+    </div>
+    <p style="font-size:.76rem;color:var(--mut);margin-top:-4px">Os blocos tracejados são <strong
+        style="color:var(--blue2)">interativos</strong> — digite, clique e veja o resultado na hora. Os exemplos com
+      fundo azul (<span class="doc-mono" style="padding:1px 24px 1px 8px;display:inline-block">assim</span>) podem
+      ser clicados pra copiar.</p>
+  </header>
+
+  <section class="doc panel" id="registrar">
+    <h2><span class="passo">1</span>Registrar uma transação</h2>
+    <p class="sub">O jeito mais simples de usar o site: você diz <strong>quem deve pagar</strong>,
+      <strong>quanto</strong>
+      e <strong>para quem</strong>. Essa é a peça básica — todo o resto (lote, conta em grupo, planilha) são só
+      formas mais rápidas de criar várias dessas de uma vez.
+    </p>
+
+    <div class="doc-bloco">
+      <h3>Os três campos</h3>
+      <p><strong>Pagador</strong> é quem deve. <strong>Recebedor</strong> é quem vai receber. <strong>Valor</strong>
+        é em reais. Os dois nomes precisam ser <strong>diferentes</strong> — o site avisa na hora se você tentar
+        colocar a mesma pessoa nos dois campos, e nem deixa ela aparecer como sugestão no outro.</p>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Sugestão de nomes</h3>
+      <p>Ao digitar, aparece uma lista com as <strong>pessoas já cadastradas</strong> (reaproveitando o nome
+        exatamente como foi escrito da primeira vez, mesmo que você digite com letras diferentes depois). Se o nome
+        ainda não existir, o campo avisa que vai ser cadastrado como pessoa nova.</p>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Maiúscula automática</h3>
+      <p>Não precisa se preocupar com maiúscula: <span class="doc-mono"
+          style="display:inline-block;padding:1px 24px 1px 8px">ana silva</span> vira automaticamente <strong>Ana
+          Silva</strong> ao salvar — primeira letra de cada palavra, espaços duplicados removidos. Vale tanto pro
+        formulário quanto pra qualquer nome que entre por texto colado, planilha ou conta em grupo.</p>
+    </div>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Experimente a prévia e as validações</span>
+      <div class="doc-widget-linha">
+        <input id="docPrevPagador" class="doc-input-nome" placeholder="Pagador (ex.: ana silva)">
+        <input id="docPrevRecebedor" class="doc-input-nome" placeholder="Recebedor (ex.: bruno)">
+        <input id="docPrevValor" type="number" step="0.01" placeholder="Valor">
+      </div>
+      <p class="doc-resultado" id="docPrevResultado">Preencha os três campos pra ver o resumo da transação — do jeito
+        que vai ficar salvo, já com a maiúscula corrigida.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="fixar">
+    <h2><span class="passo">2</span>Fixar campos (pin)</h2>
+    <p class="sub">Útil quando <strong>várias transações seguidas têm algo em comum</strong> — por exemplo, todo
+      mundo deve pra mesma pessoa, ou o valor é sempre o mesmo.</p>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Clique nos alfinetes pra fixar/soltar cada campo</span>
+      <div class="doc-widget-linha" id="docPinCampos">
+        <div class="campo" data-campo="pagador" style="min-width:150px">
+          <div class="rotulo-linha">
+            <label>Pagador</label>
+            <button class="pin" type="button" data-pin="pagador" aria-pressed="false" title="Fixar"><svg width="14"
+                height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 17v5" />
+                <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+              </svg></button>
+          </div>
+          <input placeholder="Ex.: Ana" disabled>
+        </div>
+        <div class="campo" data-campo="recebedor" style="min-width:150px">
+          <div class="rotulo-linha">
+            <label>Recebedor</label>
+            <button class="pin" type="button" data-pin="recebedor" aria-pressed="false" title="Fixar"><svg width="14"
+                height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 17v5" />
+                <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+              </svg></button>
+          </div>
+          <input placeholder="Ex.: Bruno" disabled>
+        </div>
+        <div class="campo" data-campo="valor" style="min-width:110px">
+          <div class="rotulo-linha">
+            <label>Valor</label>
+            <button class="pin" type="button" data-pin="valor" aria-pressed="false" title="Fixar"><svg width="14"
+                height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 17v5" />
+                <path d="M9 3h6l-1 6 3 4H7l3-4z" />
+              </svg></button>
+          </div>
+          <input placeholder="0,00" disabled>
+        </div>
+      </div>
+      <p class="doc-resultado" id="docPinResultado">Nenhum campo fixado ainda.</p>
+    </div>
+
+    <div class="doc-bloco">
+      <p><strong>Exemplo prático:</strong> fixe o <strong>Recebedor</strong> e o <strong>Valor</strong> no exemplo
+        acima. No site de verdade, é só trocar o Pagador e apertar <kbd>Adicionar</kbd> várias vezes seguidas —
+        rapidinho pra registrar que um grupo de pessoas pagou o mesmo valor pra mesma pessoa.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="grupo">
+    <h2><span class="passo">3</span>Adicionar conta em grupo <span class="doc-badge roxo">botão roxo</span></h2>
+    <p class="sub">Pra quando uma pessoa pagou algo que foi <strong>dividido entre várias</strong> — tipo um jantar,
+      uma compra de mercado ou uma conta de luz. O botão <strong>Adicionar conta em grupo</strong> fica acima do
+      "Importar arquivo Excel", na seção "Adicionar em lote".</p>
+
+    <div class="doc-bloco">
+      <h3>Quem pagou também participou?</h3>
+      <p>Assim que o campo <strong>Quem pagou</strong> tiver um nome que ainda não está entre os participantes,
+        aparece um botão tracejado <strong>"+ Fulano também"</strong>. Clicar nele inclui essa pessoa na divisão —
+        ou seja, é assim que você decide se o valor é dividido <em>contando</em> ou <em>não</em> com quem pagou.
+        Quem pagou <strong>nunca fica devendo a si mesmo</strong>; incluí-lo só faz a parte dele "sumir" do total
+        (porque ele já cobriu aquela parte ao pagar a conta inteira).</p>
+    </div>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Experimente: monte uma divisão de verdade</span>
+      <div class="doc-widget-linha">
+        <label for="docGrupoValor">Valor total (R$)</label>
+        <input id="docGrupoValor" type="number" step="0.01" min="0.01" value="100">
+        <label for="docGrupoPagador">Quem pagou</label>
+        <input id="docGrupoPagador" class="doc-input-nome" value="Ana">
+      </div>
+      <div class="doc-widget-linha">
+        <label for="docGrupoParticipante">Participante</label>
+        <input id="docGrupoParticipante" class="doc-input-nome" placeholder="Digite um nome e aperte Enter">
+      </div>
+      <div class="doc-chips-demo" id="docGrupoChips"></div>
+      <p class="doc-resultado" id="docGrupoResultado"></p>
+    </div>
+
+    <div class="doc-dica">
+      <b>Sem perder centavo:</b> se a divisão não for exata (R$ 100 ÷ 3 = R$ 33,33333…), o site reparte os centavos
+      sobrando de forma justa — a <strong>soma das partes sempre bate exatamente com o valor total</strong>, nunca
+      falta nem sobra 1 centavo.
+    </div>
+  </section>
+
+  <section class="doc panel" id="colar">
+    <h2><span class="passo">4</span>Colar um resumo ou planilha</h2>
+    <p class="sub">O campo <strong>"Colar um resumo ou uma tabela do Excel"</strong> (e também <kbd>Ctrl+V</kbd>
+      direto nos campos Pagador / Recebedor / Valor) reconhece vários formatos de texto automaticamente — não
+      precisa estar em nenhum formato especial.</p>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Experimente: isto roda o leitor de verdade do site</span>
+      <div class="doc-tabs" id="docParserTabs">
+        <button class="doc-tab ativa" type="button" data-exemplo="seta">Resumo com seta</button>
+        <button class="doc-tab" type="button" data-exemplo="tabela">Tabela do Excel</button>
+        <button class="doc-tab" type="button" data-exemplo="simples1">Texto simples</button>
+        <button class="doc-tab" type="button" data-exemplo="simples2">Texto simples (2)</button>
+        <button class="doc-tab" type="button" data-exemplo="negativo">Valor negativo</button>
+        <button class="doc-tab" type="button" data-exemplo="multi">3 tabelas + conferência</button>
+      </div>
+      <textarea id="docParserTexto" spellcheck="false"></textarea>
+      <div id="docParserResultado"></div>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Modal de revisão</h3>
+      <p>No site de verdade (diferente do teste acima, que já mostra o resultado direto), antes de qualquer coisa
+        entrar na lista aparece um <strong>modal de revisão</strong> com cada transação encontrada, editável e
+        removível uma a uma.</p>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Importar arquivo Excel</h3>
+      <p>O botão <strong>"Importar arquivo Excel"</strong> (ou arrastar o arquivo pro campo de colar) lê arquivos
+        <strong>.xlsx</strong>, <strong>.xlsm</strong>, <strong>.csv</strong>, <strong>.tsv</strong> ou
+        <strong>.txt</strong>, localizando as colunas Paga/Valor/Recebe pelo título — mesmo que elas não comecem na
+        primeira linha ou coluna da planilha.
+      </p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="multitabela">
+    <h2><span class="passo">5</span>Três tabelas coladas juntas (com conferência)</h2>
+    <p class="sub">Se você copiar do Excel uma seleção com várias tabelas lado a lado — como as colunas de
+      <strong>Pendências</strong>, <strong>Saldo Geral</strong> e <strong>Transações Mínimas</strong>, separadas por
+      uma coluna em branco — o site reconhece as três automaticamente, tanto colando texto quanto importando um
+      arquivo .xlsx.
+    </p>
+
+    <div class="doc-bloco">
+      <h3>Qual tabela faz o quê</h3>
+      <p><strong>Transações registradas / Pendências</strong> (Paga/Valor/Recebe) é a <strong>única que vira
+          transação</strong> na lista. <strong>Saldo Geral</strong> (Pessoa/Saldo) e <strong>Transações Mínimas /
+          Transferências</strong> (Paga/Valor/Recebe) servem só de <strong>conferência</strong>: o site calcula os
+        dois a partir da primeira tabela e mostra se batem com o que você colou — e exatamente onde está a diferença,
+        quando não bate.</p>
+    </div>
+
+    <div class="doc-dica">
+      <b>Dica:</b> clique na aba <strong>"3 tabelas + conferência"</strong> do teste lá em cima (seção anterior) pra
+      ver essa conferência pegando, de verdade, um erro de 1 centavo — exatamente o jeito que ela aponta a pessoa ou
+      a transferência exata onde a diferença aparece, em vez de só dizer "não bate".
+    </div>
+
+    <div class="doc-bloco">
+      <p>As tabelas de conferência são identificadas pelo <strong>título escrito acima do cabeçalho</strong> delas
+        ("Pendências" / "Transações registradas" para a que importa, "Transferências" / "Transações Mínimas" / "Quem
+        paga quem" para a de conferência). Sem título reconhecível, a primeira tabela de transações vira pendências e
+        a segunda vira conferência.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="minimas">
+    <h2><span class="passo">6</span>Transações Mínimas</h2>
+    <p class="sub">O resultado principal do site: o <strong>menor número possível de transferências</strong> que
+      quita todas as dívidas de uma vez, calculado automaticamente a partir de tudo que está na lista de Transações
+      registradas.</p>
+
+    <div class="doc-bloco">
+      <h3>Como pensar sobre isso</h3>
+      <p>Em vez de cada dívida virar uma transferência separada, o site <strong>soma o saldo de cada pessoa</strong>
+        (quanto ela deve no total, descontando o que tem a receber) e casa quem deve mais com quem tem mais a
+        receber, até zerar todo mundo. Isso costuma <strong>reduzir bastante</strong> o número de transferências.</p>
+    </div>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Experimente: isto roda o mesmo algorithm.js do site</span>
+      <p style="margin:0;font-size:.82rem;color:var(--mut)">Edite a lista abaixo (uma transação por linha, nos
+        mesmos formatos da seção "Colar") e veja o algoritmo reduzir ao vivo:</p>
+      <textarea id="docMinTexto" spellcheck="false">Ana → Bruno: R$ 120,00
+Bruno → Carla: R$ 80,00
+Carla → Ana: R$ 50,00
+Diego → Ana: R$ 200,00
+Bruno → Diego: R$ 35,50</textarea>
+      <p class="doc-resultado" id="docMinResumo"></p>
+      <ul class="lista doc-lista-demo" id="docMinLista"></ul>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>A ordem da lista</h3>
+      <p>As transferências aparecem na <strong>ordem em que o cálculo as gera</strong> — o site não reordena nem
+        por nome nem por valor, de propósito, pra ficar claro e previsível.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="pago">
+    <h2><span class="passo">7</span>Marcar como pago</h2>
+    <p class="sub">Cada transferência da lista de Transações Mínimas tem uma <strong>caixinha de marcar</strong>. Ao
+      marcar, ela fica visualmente diferente (e mostra uma pequena animação de confirmação, se "Mostrar animação"
+      estiver ligado).</p>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Clique na caixinha</span>
+      <div class="resultado">
+        <ul class="lista doc-lista-demo" id="docPagoLista" style="max-height:none"></ul>
+      </div>
+    </div>
+
+    <div class="doc-bloco">
+      <p>Essa marcação fica <strong>salva no seu navegador</strong>: se você fechar a aba e voltar depois, o que já
+        estava marcado continua marcado — desde que as mesmas pessoas, no mesmo sentido e valor, ainda apareçam na
+        lista. Se alguma transação mudar e aquela transferência deixar de existir, a marcação some junto.</p>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Dois tipos de "pago"</h3>
+      <p>A caixinha das <strong>Transações Mínimas</strong> é só um <strong>lembrete</strong>: ela não muda saldos nem
+        cálculos. Já a caixinha das <strong>Transações registradas</strong> (seção 8) <strong>muda a conta</strong>: a
+        transação marcada sai dos saldos e das Transações Mínimas. Como as Mínimas são recalculadas, marcações antigas
+        que deixam de existir são descartadas, e o site avisa quando isso acontece.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="registradas">
+    <h2><span class="passo">8</span>Transações registradas</h2>
+    <p class="sub">A lista de <strong>tudo que foi lançado</strong>, uma linha por transação (diferente da lista de
+      Transações Mínimas, que é o resultado já simplificado). Cada linha tem uma <strong>caixinha de pago</strong>.</p>
+
+    <div class="doc-widget">
+      <span class="doc-widget-titulo">Experimente marcar como paga, excluir e desfazer</span>
+      <ul class="lista doc-lista-demo" id="docRegLista" style="max-height:none"></ul>
+      <p class="doc-resultado" id="docRegResumo"></p>
+      <p class="doc-resultado" id="docRegAviso" style="min-height:1.4em"></p>
+    </div>
+
+    <div class="doc-bloco">
+      <h3>Marcar uma transação como paga</h3>
+      <p>Ao marcar, a transação fica verde, com o valor riscado, e <strong>deixa de contar</strong> nos saldos e nas
+        Transações Mínimas (a pessoa continua na lista de saldos, com saldo zero e a etiqueta "quitado"). Desmarcar
+        devolve tudo ao cálculo. Editar uma transação paga <strong>mantém</strong> a marcação.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="saldos">
+    <h2><span class="passo">9</span>Saldo de cada pessoa</h2>
+    <p class="sub">Um resumo de quanto <strong>cada pessoa deve ou tem a receber</strong> no total, com uma
+      barrinha proporcional ao valor — <strong style="color:var(--pos)">verde</strong> pra quem recebe,
+      <strong style="color:var(--neg)">vermelho</strong> pra quem paga. Só contam as transações
+      <strong>não pagas</strong>: quem já quitou tudo continua na lista com saldo zero e a etiqueta "quitado".
+    </p>
+    <ul class="lista doc-lista-demo" id="docSaldoLista" style="max-height:none"></ul>
+  </section>
+
+  <section class="doc panel" id="copiar">
+    <h2><span class="passo">10</span>Copiar (dois formatos)</h2>
+    <p class="sub">Tanto em Transações Mínimas quanto em Transações registradas, o botão de copiar abre um
+      <strong>modal com duas opções</strong> — o título do botão já diz qual tabela está sendo copiada.
+    </p>
+
+    <div class="doc-grade2">
+      <div class="doc-exemplo">
+        <strong style="color:var(--blue2)">Copiador Intuitivo</strong>
+        <p style="color:var(--mut);margin:6px 0 10px">Frase clara, pronta pra colar numa mensagem:</p>
+        <div class="doc-mono">Ana paga → Bruno recebe: R$ 120,00</div>
+      </div>
+      <div class="doc-exemplo">
+        <strong style="color:var(--pos)">Copiador Excel</strong>
+        <p style="color:var(--mut);margin:6px 0 10px">Colunas separadas por tabulação, sem cabeçalho — cole direto
+          numa planilha: </p>
+        <div class="doc-mono">Ana 120,00 Bruno</div>
+      </div>
+    </div>
+    <p style="font-size:.78rem;color:var(--mut);margin-top:10px">Clique em qualquer um dos dois acima — são
+      exemplos de verdade, clicáveis, que copiam pra sua área de transferência.</p>
+  </section>
+
+  <section class="doc panel" id="exportar">
+    <h2><span class="passo">11</span>Exportar Excel</h2>
+    <p class="sub">Gera um arquivo <strong>.xlsx de verdade</strong> (não só um texto) com as colunas Paga, Valor e
+      Recebe, tanto para Transações Mínimas quanto para Transações registradas.</p>
+    <div class="doc-bloco">
+      <h3>Exportar Transações Mínimas: tudo ou só as não confirmadas</h3>
+      <p>Ao exportar as <strong>Transações Mínimas</strong>, um modal pergunta se você quer
+        <strong>exportar tudo</strong> ou <strong>só as transferências ainda não confirmadas</strong> (as que você
+        não marcou como pagas). O arquivo ganha uma coluna <strong>Pago</strong> com <strong>Sim</strong> ou
+        <strong>Não</strong> em cada linha. Se todas já estiverem pagas, a segunda opção fica desabilitada.
+      </p>
+      <p>O mesmo vale para as <strong>Transações registradas</strong>: o modal oferece <strong>tudo</strong> ou
+        <strong>só as não pagas</strong>, e a coluna <strong>Pago</strong> traz
+        <strong>Sim</strong>/<strong>Não</strong>.
+        Ao <strong>reimportar</strong> um arquivo com essa coluna, as linhas com "Sim" voltam já marcadas como pagas.
+      </p>
+    </div>
+    <div class="doc-bloco">
+      <p>A coluna Valor vem com uma <strong>escala de cor</strong>: valores baixos em verde, médios em amarelo, os
+        maiores em vermelho — fácil de ver de relance quem deve mais. O arquivo gerado pode ser <strong>recolado de
+          volta</strong> no site (ou importado pelo botão "Importar arquivo Excel") a qualquer momento; a coluna
+        Pago é ignorada na importação.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="topo">
+    <h2><span class="passo">12</span>Carregar exemplo e Reiniciar</h2>
+    <div class="doc-bloco">
+      <h3>Carregar exemplo</h3>
+      <p>Preenche o site com algumas transações de exemplo, pra você experimentar sem digitar nada. Se já houver
+        transações suas, aparece uma <strong>confirmação</strong> antes de substituir — sem dados na lista, carrega
+        direto.</p>
+    </div>
+    <div class="doc-bloco">
+      <h3>Reiniciar</h3>
+      <p>Apaga todas as transações e marcações de pago. Também pede <strong>confirmação</strong> (mostrando quantas
+        transações seriam apagadas) e, depois de confirmar, ainda dá pra <strong>desfazer</strong> pelo aviso que
+        aparece.</p>
+    </div>
+    <div class="doc-bloco">
+      <h3>Mostrar animação</h3>
+      <p>Um interruptor no topo liga/desliga a animação que aparece ao adicionar uma transação ou confirmar um
+        pagamento. Desligado, tudo acontece na hora, sem a telinha animada.</p>
+    </div>
+  </section>
+
+  <section class="doc panel" id="dados">
+    <h2><span class="passo">13</span>Onde ficam os seus dados</h2>
+    <p class="sub">O Otimizador de Transações <strong>não tem servidor nem banco de dados</strong> — é só HTML, CSS
+      e JavaScript rodando no seu navegador.</p>
+    <div class="doc-dica">
+      <b>Privacidade:</b> tudo o que você registra fica guardado apenas no navegador que você está usando (no
+      armazenamento local do site). <strong>Nada é enviado pra nenhum lugar.</strong> Isso também significa que, se
+      você trocar de navegador, de computador, ou limpar os dados de navegação, as transações não vão estar lá — use
+      os botões de <strong>Copiar</strong> ou <strong>Exportar Excel</strong> pra guardar uma cópia fora do site
+      antes disso, se precisar.
+    </div>
+  </section>
+
+  <section class="doc panel" id="experimente">
+    <h2><span class="passo">14</span>Experimente ao vivo, aqui mesmo</h2>
+    <p class="sub">O <strong>site de verdade</strong>, carregado direto nesta página — tudo que foi explicado acima
+      funciona ali embaixo de verdade. Qualquer transação que você adicionar fica só neste navegador (veja a seção
+      anterior).</p>
+    <div class="doc-iframe-caixa">
+      <iframe src="index.html" title="Otimizador de Transações — ao vivo" loading="lazy"></iframe>
+    </div>
+  </section>
+
+  <p class="doc-rodape">Esta página é atualizada junto com o site — se alguma funcionalidade mudar, o texto e os
+    testes aqui mudam também. · <a href="index.html">Voltar para o site</a></p>
+
+  <!-- Código de verdade do site, só pra alimentar os testes interativos acima (nunca é alterado aqui) -->
+  <script src="js/nucleo/algorithm.js"></script>
+  <script src="js/dados/importar.js"></script>
+
+  <script>
+    const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    const brl = c => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const norm = s => String(s).trim().toLowerCase();
+    const capitalizar = n => String(n).trim().replace(/\s+/g, ' ').replace(/(^|\s)(\p{Ll})/gu, (m, a, b) => a + b.toUpperCase());
+    function avatarDemo(nome) {
+      let h = 0;
+      for (const ch of String(nome).toLowerCase()) h = (h * 31 + ch.charCodeAt(0)) % 360;
+      const hue = 200 + (h % 90);
+      const ini = String(nome).trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+      return `<span class="avatar" style="background:hsl(${hue} 65% 45%)">${esc(ini)}</span>`;
+    }
+    const ICONE_EDITAR = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>';
+    const ICONE_EXCLUIR = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>';
+
+    // Realce do item ativo na navegação, conforme a seção visível
+    (function () {
+      const links = [...document.querySelectorAll('#docNav a')];
+      const secoes = links.map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+      const porId = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+      const observer = new IntersectionObserver(entradas => {
+        entradas.forEach(e => {
+          const link = porId.get(e.target.id);
+          if (!link) return;
+          if (e.isIntersecting) { links.forEach(a => a.classList.remove('ativo')); link.classList.add('ativo'); }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      secoes.forEach(s => observer.observe(s));
+    })();
+
+    // Qualquer exemplo de código (.doc-mono) é clicável pra copiar de verdade
+    (function () {
+      document.querySelectorAll('.doc-mono').forEach(el => {
+        el.title = 'Clique para copiar';
+        const caixa = document.createElement('div');
+        caixa.className = 'doc-mono-caixa';
+        el.parentNode.insertBefore(caixa, el);
+        caixa.appendChild(el);
+        const aviso = document.createElement('span');
+        aviso.className = 'doc-mono-copiado';
+        aviso.textContent = 'Copiado!';
+        caixa.appendChild(aviso);
+        el.addEventListener('click', async () => {
+          try { await navigator.clipboard.writeText(el.textContent); }
+          catch (e) { /* alguns navegadores só permitem com gesto do usuário — o clique já conta */ }
+          aviso.classList.add('on');
+          setTimeout(() => aviso.classList.remove('on'), 1400);
+        });
+      });
+    })();
+
+    // 1) Registrar transação — prévia e validações ao vivo
+    (function () {
+      const p = document.getElementById('docPrevPagador');
+      const r = document.getElementById('docPrevRecebedor');
+      const v = document.getElementById('docPrevValor');
+      const out = document.getElementById('docPrevResultado');
+      function atualizar() {
+        const pv = p.value.trim(), rv = r.value.trim(), vv = parseFloat(v.value);
+        if (!pv || !rv || !(vv > 0)) { out.textContent = 'Preencha os três campos pra ver o resumo da transação — do jeito que vai ficar salvo, já com a maiúscula corrigida.'; out.classList.remove('doc-resultado-aviso'); return; }
+        if (norm(pv) === norm(rv)) { out.innerHTML = 'Pagador e recebedor devem ser pessoas diferentes.'; out.classList.add('doc-resultado-aviso'); return; }
+        out.classList.remove('doc-resultado-aviso');
+        out.innerHTML = `<strong>${esc(capitalizar(pv))}</strong> deve <strong>${brl(Math.round(vv * 100))}</strong> a <strong>${esc(capitalizar(rv))}</strong>`;
+      }
+      [p, r, v].forEach(el => el.addEventListener('input', atualizar));
+    })();
+
+    // 2) Fixar campos — demo dos alfinetes
+    (function () {
+      const fixados = new Set();
+      document.querySelectorAll('#docPinCampos [data-pin]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const campo = btn.closest('.campo');
+          const nome = campo.dataset.campo;
+          const ativo = fixados.has(nome);
+          if (ativo) fixados.delete(nome); else fixados.add(nome);
+          btn.setAttribute('aria-pressed', String(!ativo));
+          campo.classList.toggle('fixado', !ativo);
+          const out = document.getElementById('docPinResultado');
+          const nomes = { pagador: 'Pagador', recebedor: 'Recebedor', valor: 'Valor' };
+          const lista = [...fixados].map(n => nomes[n]);
+          out.innerHTML = lista.length
+            ? `<strong>${lista.join(', ')}</strong> ${lista.length === 1 ? 'fica' : 'ficam'} preenchido${lista.length === 1 ? '' : 's'} ao adicionar a próxima transação.`
+            : 'Nenhum campo fixado ainda.';
+        });
+      });
+    })();
+
+    // 3) Conta em grupo — chips + divisão justa, reaproveitando a mesma matemática do site
+    (function () {
+      let participantes = [];
+      const valorEl = document.getElementById('docGrupoValor');
+      const pagadorEl = document.getElementById('docGrupoPagador');
+      const campoEl = document.getElementById('docGrupoParticipante');
+      const chipsEl = document.getElementById('docGrupoChips');
+      const resultadoEl = document.getElementById('docGrupoResultado');
+
+      function calcularPartes(valorTotal, nomes) {
+        const centavosTotal = Math.round(valorTotal * 100);
+        const n = nomes.length;
+        const base = Math.floor(centavosTotal / n);
+        const resto = centavosTotal - base * n;
+        return nomes.map((nome, i) => ({ nome: nome, valor: (base + (i < resto ? 1 : 0)) / 100 }));
+      }
+
+      function adicionar(nomeBruto) {
+        const nome = String(nomeBruto || '').trim();
+        if (!nome || participantes.some(p => norm(p) === norm(nome))) return;
+        participantes.push(nome);
+        desenhar();
+      }
+
+      function desenhar() {
+        const pagador = pagadorEl.value.trim();
+        let html = participantes.map((p, i) => `<span class="doc-chip">${esc(p)}<button type="button" data-rm="${i}">×</button></span>`).join('');
+        const jaTem = pagador && participantes.some(p => norm(p) === norm(pagador));
+        if (pagador && !jaTem) html += `<button type="button" class="doc-chip doc-chip-sugestao" id="docGrupoIncluir">+ ${esc(pagador)} também</button>`;
+        chipsEl.innerHTML = html;
+        atualizarResultado();
+      }
+
+      function atualizarResultado() {
+        const valor = parseFloat(valorEl.value);
+        const pagador = pagadorEl.value.trim();
+        if (!(valor > 0) || !pagador || !participantes.length) {
+          resultadoEl.textContent = 'Preencha o valor, quem pagou, e adicione participantes (Enter pra cada nome).';
+          return;
+        }
+        const partes = calcularPartes(valor, participantes).filter(p => norm(p.nome) !== norm(pagador));
+        if (!partes.length) { resultadoEl.innerHTML = `Adicione alguém além de <strong>${esc(pagador)}</strong> pra dividir a conta.`; return; }
+        resultadoEl.innerHTML = 'Vira<strong> ' + partes.length + (partes.length === 1 ? ' transação' : ' transações') + '</strong>: ' +
+          partes.map(p => `<strong>${esc(p.nome)}</strong> deve ${brl(Math.round(p.valor * 100))} a <strong>${esc(pagador)}</strong>`).join('; ') + '.';
+      }
+
+      chipsEl.addEventListener('click', e => {
+        const rm = e.target.closest('[data-rm]');
+        if (rm) { participantes.splice(+rm.dataset.rm, 1); return desenhar(); }
+        if (e.target.closest('#docGrupoIncluir')) adicionar(pagadorEl.value);
+      });
+      campoEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); adicionar(campoEl.value); campoEl.value = ''; }
+      });
+      valorEl.addEventListener('input', atualizarResultado);
+      pagadorEl.addEventListener('input', desenhar);
+
+      adicionar('Bruno'); adicionar('Carla'); adicionar('Diego');
+    })();
+
+    // 4) Colar / importar — leitor de verdade (ImportarResumo, o mesmo js/dados/importar.js do site)
+    (function () {
+      if (typeof ImportarResumo === 'undefined') return;
+      const EXEMPLOS = {
+        seta: 'Ana → Bruno: R$ 120,00\nCarla → Ana: R$ 50,00',
+        tabela: 'Paga\tValor\tRecebe\nAna\t120,00\tBruno\nCarla\t50,00\tAna',
+        simples1: 'Ana Bruno 120,00\nCarla Ana 50,00',
+        simples2: 'Ana 120,00 Bruno\nCarla 50,00 Ana',
+        negativo: 'João Arthur -28,59 LuisH',
+        multi: 'PENDÊNCIAS\t\t\t\tSaldo Geral\t\t\tTransferências\nPaga\tValor\tRecebe\t\tPessoa\tSaldo\t\tPaga\tValor\tRecebe\nAna\t120,00\tBruno\t\tAna\t-R$ 70,02\t\tAna\t70,00\tBruno\nCarla\t50,00\tAna\t\tBruno\tR$ 70,00\nBruno\t50,00\tCarla'
+      };
+      const textoEl = document.getElementById('docParserTexto');
+      const resultadoEl = document.getElementById('docParserResultado');
+
+      function linhaHtml(l) {
+        return `<li class="item"><span class="txt"><strong>${esc(l.pagador)}</strong><em>deve a</em><strong>${esc(l.recebedor)}</strong></span><span class="valor">${brl(Math.round(l.valor * 100))}</span></li>`;
+      }
+      function trechoConferenciaHtml(nome, r) {
+        if (r.ok) return `<div class="imp-conf-item ok"><span class="imp-conf-selo">✓</span><strong>${esc(nome)}</strong> confere com as transações.</div>`;
+        return `<div class="imp-conf-item erro"><span class="imp-conf-selo">✗</span><strong>${esc(nome)}</strong>: ${r.erros.length} ${r.erros.length === 1 ? 'divergência' : 'divergências'}.<ul class="imp-conf-lista">${r.erros.map(e => `<li>${esc(e)}</li>`).join('')}</ul></div>`;
+      }
+
+      function processar() {
+        const texto = textoEl.value;
+        if (!texto.trim()) { resultadoEl.innerHTML = '<p class="doc-resultado">Cole ou digite algo acima.</p>'; return; }
+        let res;
+        try { res = ImportarResumo.interpretarTexto(texto, []); }
+        catch (e) { resultadoEl.innerHTML = '<p class="doc-resultado">Não consegui ler esse texto.</p>'; return; }
+
+        let html = '';
+        if (!res.linhas.length) {
+          html += '<p class="doc-resultado">Nenhuma transação reconhecida nesse texto.</p>';
+        } else {
+          html += `<p class="doc-resultado"><strong>${res.linhas.length}</strong> ${res.linhas.length === 1 ? 'transação reconhecida' : 'transações reconhecidas'}:</p>`;
+          html += '<ul class="lista doc-lista-demo">' + res.linhas.map(linhaHtml).join('') + '</ul>';
+        }
+        const avisos = [];
+        if (res.ignoradas.length) avisos.push(`${res.ignoradas.length} linha(s) não reconhecida(s).`);
+        if (res.invertidas) avisos.push(`${res.invertidas} linha(s) com valor negativo tiveram o sentido invertido.`);
+        if (res.incertas) avisos.push(`${res.incertas} linha(s) com nome ambíguo, marcada(s) pra conferência.`);
+        if (avisos.length) html += `<p class="doc-resultado doc-resultado-aviso">${avisos.join(' ')}</p>`;
+
+        if (res.verificacao) {
+          const linhasAtuais = res.linhas.map(l => ({ pagador: l.pagador, recebedor: l.recebedor, valor: l.valor }));
+          html += '<div class="imp-conferencia" style="margin-top:10px">';
+          if (res.verificacao.saldoInformado) html += trechoConferenciaHtml('Saldo Geral', ImportarResumo.conferirSaldo(linhasAtuais, res.verificacao.saldoInformado));
+          if (res.verificacao.minimasInformadas) html += trechoConferenciaHtml('Transações Mínimas', ImportarResumo.conferirMinimas(linhasAtuais, res.verificacao.minimasInformadas));
+          html += '</div>';
+        }
+        resultadoEl.innerHTML = html;
+      }
+
+      document.querySelectorAll('#docParserTabs .doc-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('#docParserTabs .doc-tab').forEach(t => t.classList.remove('ativa'));
+          tab.classList.add('ativa');
+          textoEl.value = EXEMPLOS[tab.dataset.exemplo];
+          processar();
+        });
+      });
+      textoEl.addEventListener('input', processar);
+      textoEl.value = EXEMPLOS.seta;
+      processar();
+    })();
+
+    // 6) Transações Mínimas — reduz ao vivo com o algorithm.js de verdade
+    (function () {
+      if (typeof otimizarTransacoesMatriz === 'undefined' || typeof ImportarResumo === 'undefined') return;
+      const textoEl = document.getElementById('docMinTexto');
+      const resumoEl = document.getElementById('docMinResumo');
+      const listaEl = document.getElementById('docMinLista');
+
+      function processar() {
+        const res = ImportarResumo.interpretarTexto(textoEl.value, []);
+        const matriz = res.linhas.map(l => [l.pagador, l.valor, l.recebedor]);
+        if (!matriz.length) { resumoEl.textContent = 'Escreva pelo menos uma transação acima.'; listaEl.innerHTML = ''; return; }
+        const acertos = otimizarTransacoesMatriz(matriz);
+        const eco = matriz.length - acertos.length;
+        resumoEl.innerHTML = `De <strong>${matriz.length}</strong> ${matriz.length === 1 ? 'transação' : 'transações'} pra <strong>${acertos.length}</strong> ${acertos.length === 1 ? 'transferência' : 'transferências'}` + (eco > 0 ? ` — <strong style="color:var(--pos)">${eco} a menos</strong>.` : '.');
+        listaEl.innerHTML = acertos.length ? acertos.map(a => `
+          <li class="item">
+            ${avatarDemo(a.de)}
+            <div class="acerto">
+              <span class="nome">${esc(a.de)}<small>paga</small></span>
+              <span class="seta" aria-hidden="true">→</span>
+              ${avatarDemo(a.para)}
+              <span class="nome">${esc(a.para)}<small>recebe</small></span>
+            </div>
+            <span class="valor-col"><span class="valor pos">${brl(Math.round(a.valor * 100))}</span></span>
+          </li>`).join('') : '<li class="vazio">Tudo quitado!</li>';
+      }
+      textoEl.addEventListener('input', processar);
+      processar();
+    })();
+
+    // 7) Marcar como pago — demo
+    (function () {
+      const exemplos = [
+        { de: 'Diego', para: 'Ana', valor: 13000, pago: false },
+        { de: 'Diego', para: 'Carla', valor: 3000, pago: true }
+      ];
+      const listaEl = document.getElementById('docPagoLista');
+      function desenhar() {
+        listaEl.innerHTML = exemplos.map((a, i) => `
+          <li class="item${a.pago ? ' pago' : ''}">
+            <input type="checkbox" class="pagar" data-i="${i}" ${a.pago ? 'checked' : ''} aria-label="Marcar como pago">
+            <div class="acerto">
+              ${avatarDemo(a.de)}
+              <span class="nome">${esc(a.de)}<small>paga</small></span>
+              <span class="seta" aria-hidden="true">→</span>
+              ${avatarDemo(a.para)}
+              <span class="nome">${esc(a.para)}<small>recebe</small></span>
+            </div>
+            <span class="valor-col"><span class="valor pos">${brl(a.valor)}</span>${a.pago ? '<small class="selo-pago">Pago</small>' : ''}</span>
+          </li>`).join('');
+      }
+      listaEl.addEventListener('change', e => {
+        const cb = e.target.closest('[data-i]');
+        if (!cb) return;
+        exemplos[+cb.dataset.i].pago = cb.checked;
+        desenhar();
+      });
+      desenhar();
+    })();
+
+    // 8) Transações registradas — marcar como paga / editar / excluir / desfazer
+    (function () {
+      let itens = [['Ana', 12000, 'Bruno', false], ['Bruno', 8000, 'Carla', false], ['Carla', 5000, 'Ana', false]];
+      let ultimaExcluida = null, timer;
+      const listaEl = document.getElementById('docRegLista');
+      const avisoEl = document.getElementById('docRegAviso');
+      const resumoEl = document.getElementById('docRegResumo');
+      function desenhar() {
+        listaEl.innerHTML = itens.length ? itens.map((t, i) => `
+          <li class="item${t[3] ? ' pago' : ''}">
+            <input type="checkbox" class="pagar" data-pago="${i}" ${t[3] ? 'checked' : ''} aria-label="Marcar como paga">
+            <span class="txt"><strong>${esc(t[0])}</strong><em>deve a</em><strong>${esc(t[2])}</strong></span>
+            <span class="valor-col"><span class="valor">${brl(t[1])}</span>${t[3] ? '<small class="selo-pago">Pago</small>' : ''}</span>
+            <button class="icone" data-edit="${i}" title="Editar">${ICONE_EDITAR}</button>
+            <button class="icone del" data-del="${i}" title="Excluir">${ICONE_EXCLUIR}</button>
+          </li>`).join('') : '<li class="vazio">Tudo excluído — clique em "Desfazer" abaixo, se quiser.</li>';
+        const abertas = itens.filter(t => !t[3]);
+        const acertos = otimizarTransacoesMatriz(abertas.map(t => [t[0], t[1] / 100, t[2]]));
+        resumoEl.innerHTML = `Contando só as <strong>${abertas.length}</strong> não pagas, as Transações Mínimas têm <strong>${acertos.length}</strong> ${acertos.length === 1 ? 'transferência' : 'transferências'}.`;
+      }
+      listaEl.addEventListener('change', e => {
+        const cb = e.target.closest('[data-pago]');
+        if (!cb) return;
+        itens[+cb.dataset.pago][3] = cb.checked;
+        desenhar();
+      });
+      listaEl.addEventListener('click', e => {
+        const edt = e.target.closest('[data-edit]');
+        if (edt) { avisoEl.innerHTML = 'No site de verdade, isso carregaria a transação de volta no formulário do topo pra editar.'; return; }
+        const del = e.target.closest('[data-del]');
+        if (!del) return;
+        const i = +del.dataset.del;
+        ultimaExcluida = { linha: itens[i], i: i };
+        itens.splice(i, 1);
+        desenhar();
+        avisoEl.innerHTML = 'Transação removida. <button type="button" id="docRegDesfazer" style="background:none;border:0;color:var(--blue2);font-weight:700;cursor:pointer;text-decoration:underline">Desfazer</button>';
+        clearTimeout(timer);
+        timer = setTimeout(() => { avisoEl.textContent = ''; }, 6000);
+      });
+      avisoEl.addEventListener('click', e => {
+        if (!e.target.closest('#docRegDesfazer') || !ultimaExcluida) return;
+        itens.splice(ultimaExcluida.i, 0, ultimaExcluida.linha);
+        ultimaExcluida = null;
+        desenhar();
+        avisoEl.textContent = '';
+      });
+      desenhar();
+    })();
+
+    // 9) Saldo de cada pessoa — mockup com as classes reais
+    (function () {
+      const saldos = [
+        { nome: 'Ana', saldo: 13000 },
+        { nome: 'Carla', saldo: 3000 },
+        { nome: 'Diego', saldo: -16000 }
+      ];
+      const max = Math.max(...saldos.map(p => Math.abs(p.saldo)));
+      document.getElementById('docSaldoLista').innerHTML = saldos.map(p => {
+        const cls = p.saldo > 0 ? 'pos' : p.saldo < 0 ? 'neg' : 'zero';
+        const tag = p.saldo > 0 ? 'recebe' : p.saldo < 0 ? 'paga' : 'quitado';
+        const cor = p.saldo > 0 ? 'var(--pos)' : 'var(--neg)';
+        return `<li class="item">${avatarDemo(p.nome)}
+          <div class="saldo">
+            <div class="topo"><strong>${esc(p.nome)}</strong>
+              <span><span class="tag ${cls}">${tag}</span> <span class="valor ${cls}">${brl(Math.abs(p.saldo))}</span></span></div>
+            <div class="barra"><i style="width:${Math.abs(p.saldo) / max * 100}%;background:${cor}"></i></div>
+          </div></li>`;
+      }).join('');
+    })();
+  </script>
+</body>
+
+</html>
