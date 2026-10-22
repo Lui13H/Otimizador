@@ -906,6 +906,17 @@
       color: var(--pos)
     }
 
+    .selo-parcial {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--blue2);
+      white-space: nowrap
+    }
+
+    li.item.parcial {
+      border-color: rgba(77, 124, 255, .5)
+    }
+
     .resultado li.item.pago {
       background: linear-gradient(135deg, rgba(61, 220, 151, .18), rgba(61, 220, 151, .06));
       border-color: rgba(61, 220, 151, .5)

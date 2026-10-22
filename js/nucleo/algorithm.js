@@ -1,24 +1,40 @@
-// Função auxiliar de particionamento para o Quicksort manual
-function particionar(arr, baixo, alto) {
-    let pivo = arr[alto].saldo;
-    let i = baixo - 1;
-    for (let j = baixo; j < alto; j++) {
-        if (arr[j].saldo < pivo) {
+// =========================================================================
+// FUNÇÕES AUXILIARES DE ORDENAÇÃO: MERGE SORT MANUAL (Sem usar .sort())
+// =========================================================================
+
+function merge(esquerda, direita) {
+    let resultado = [];
+    let i = 0;
+    let j = 0;
+
+    // Compara os elementos dos dois arrays e os une em ordem crescente de saldo
+    while (i < esquerda.length && j < direita.length) {
+        if (esquerda[i].saldo < direita[j].saldo) {
+            resultado.push(esquerda[i]);
             i++;
-            let temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;
+        } else {
+            resultado.push(direita[j]);
+            j++;
         }
     }
-    let temp = arr[i + 1]; arr[i + 1] = arr[alto]; arr[alto] = temp;
-    return i + 1;
+
+    // Conecta os elementos restantes (caso sobustem em algum dos lados)
+    return resultado.concat(esquerda.slice(i)).concat(direita.slice(j));
 }
 
-// Quicksort manual (sem usar .sort())
-function quickSort(arr, baixo, alto) {
-    if (baixo < alto) {
-        let pi = particionar(arr, baixo, alto);
-        quickSort(arr, baixo, pi - 1);
-        quickSort(arr, pi + 1, alto);
+function mergeSort(arr) {
+    // Caso base: se o array tiver 1 ou 0 elementos, ele já está ordenado
+    if (arr.length <= 1) {
+        return arr;
     }
+
+    // Divide o array ao meio
+    let meio = Math.floor(arr.length / 2);
+    let esquerda = arr.slice(0, meio);
+    let direita = arr.slice(meio);
+
+    // Recursão para ordenar as metades e mesclá-las em seguida
+    return merge(mergeSort(esquerda), mergeSort(direita));
 }
 
 /**
@@ -79,12 +95,12 @@ function otimizarTransacoesMatriz(matrizTransacoes) {
     }
 
     // -------------------------------------------------------------------------
-    // ETAPA 3: Ordenação Estratégica (.sort / Timsort)
+    // ETAPA 3: Ordenação Estratégica via Merge Sort Manual
     // Custo: O(N log N)
-    // Justificativa: Ordena o vetor de pessoas únicas do menor para o maior saldo.
-    // Esta é a operação que dita o gargalo principal do matching financeiro.
+    // Justificativa: Ordena o vetor de pessoas únicas do menor para o maior saldo
+    // utilizando a estratégia de divisão e conquista do Merge Sort.
     // -------------------------------------------------------------------------
-    pessoas.sort((a, b) => a.saldo - b.saldo);
+    pessoas = mergeSort(pessoas);
 
     // -------------------------------------------------------------------------
     // ETAPA 4: Liquidação por Dois Ponteiros nas Pontas
@@ -93,7 +109,7 @@ function otimizarTransacoesMatriz(matrizTransacoes) {
     // das extremidades (esq para devedores, dir para credores).
     // -------------------------------------------------------------------------
     const transferencias = [];
-    let esq = 0;                  // Ponteiro esquerdo (maiores devedores)
+    let esq = 0;                    // Ponteiro esquerdo (maiores devedores)
     let dir = pessoas.length - 1; // Ponteiro direito (maiores credores)
 
     while (esq < dir) {

@@ -70,33 +70,39 @@
       return arr;
     }
 
+    // Quanto ainda falta de uma transação (valor menos o que já foi pago parcialmente)
+    const restante = t => Math.max(0, t[1] - (t[4] || 0));
+
     // Transações ainda não pagas: só elas entram nos saldos e no algoritmo
     const ativas = () => transacoes.filter(t => !t[3]);
-    const calcularAcertos = () => otimizarTransacoesMatriz(ativas().map(t => [t[0], t[1], t[2]]));
+    const calcularAcertos = () => otimizarTransacoesMatriz(ativas().map(t => [t[0], restante(t), t[2]]));
 
-    // Todas as pessoas aparecem; o saldo considera apenas as transações não pagas
+    // Todas as pessoas aparecem; o saldo considera apenas as transações não pagas (pelo valor restante)
     function saldosExibicao() {
-      const abertos = consolidarSaldos(ativas());
+      const abertos = consolidarSaldos(ativas().map(t => [t[0], restante(t), t[2]]));
       return consolidarSaldos(transacoes).map(p => {
         const a = abertos.find(x => x.nome === p.nome);
         return { nome: p.nome, saldo: a ? a.saldo : 0 };
       });
     }
 
-    // Transferências já pagas (chave = pagador→recebedor→centavos), lembradas no navegador
+    // Transferências já pagas, inteiras ou em parte (chave = pagador→recebedor→centavos → valor já pago), lembradas no navegador
     const CHAVE_PAGOS = 'otimizador-pagos';
-    let pagos = new Set();
+    let pagos = new Map();
     let acertosAtuais = [];
-    try { pagos = new Set(JSON.parse(localStorage.getItem(CHAVE_PAGOS)) || []); } catch (e) { pagos = new Set(); }
+    try { pagos = new Map(JSON.parse(localStorage.getItem(CHAVE_PAGOS)) || []); } catch (e) { pagos = new Map(); }
     const chaveAcerto = a => a.de + '→' + a.para + '→' + Math.round(a.valor * 100);
+    const acertoValorPago = a => Math.min(pagos.get(chaveAcerto(a)) || 0, a.valor);
+    const acertoPagoCompleto = a => acertoValorPago(a) >= a.valor - 0.005;
     let toastTimer;
 
     try { transacoes = JSON.parse(localStorage.getItem(CHAVE)) || []; } catch (e) { transacoes = []; }
-    transacoes = transacoes.map(t => [capitalizarNome(t[0]), t[1], capitalizarNome(t[2]), !!t[3]]);; // nomes salvos antes em minúsculas
+    transacoes = transacoes.map(t => [capitalizarNome(t[0]), t[1], capitalizarNome(t[2]), !!t[3], Number(t[4]) || 0]); // nomes salvos antes em minúsculas
 
     const ICONES = {
       editar: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>',
-      excluir: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>'
+      excluir: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>',
+      parcial: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg>'
     };
 
     function avatar(nome) {
@@ -120,18 +126,22 @@
 
     /* ---------- Renderização ---------- */
     function render() {
+      // Se o pagamento parcial de uma transação já cobre o valor inteiro, completa sozinho
+      transacoes.forEach(t => {
+        if (!t[3] && (t[4] || 0) >= t[1] - 0.005) { t[3] = true; t[4] = t[1]; }
+      });
       try { localStorage.setItem(CHAVE, JSON.stringify(transacoes)); } catch (e) { }
 
       const saldos = saldosExibicao().sort((a, b) => b.saldo - a.saldo || a.nome.localeCompare(b.nome));
       const acertos = calcularAcertos();
       acertosAtuais = acertos;
-      // Mantém como "pagas" só as transferências que ainda existem no resultado
-      const chavesAtuais = acertos.map(chaveAcerto);
+      // Mantém os pagamentos (inteiros ou parciais) só das transferências que ainda existem no resultado
+      const chavesAtuais = new Set(acertos.map(chaveAcerto));
       const antes = pagos.size;
-      pagos = new Set([...pagos].filter(k => chavesAtuais.includes(k)));
+      for (const k of [...pagos.keys()]) if (!chavesAtuais.has(k)) pagos.delete(k);
       const descartadas = antes - pagos.size;
       if (descartadas > 0 && iniciado) {
-        notaExtra = `${descartadas} ${descartadas === 1 ? 'marcação de pago nas Transações Mínimas foi descartada' : 'marcações de pago nas Transações Mínimas foram descartadas'} porque o cálculo mudou.`;
+        notaExtra = `${descartadas} ${descartadas === 1 ? 'marcação de pagamento nas Transações Mínimas foi descartada' : 'marcações de pagamento nas Transações Mínimas foram descartadas'} porque o cálculo mudou.`;
         // se nenhum aviso() for chamado logo após o render, mostra a nota sozinha
         queueMicrotask(() => { if (notaExtra) aviso(''); });
       }
@@ -150,14 +160,18 @@
 
       $('listaTrans').innerHTML = !transacoes.length
         ? `<li class="vazio"><b>Nenhuma transação ainda</b>Preencha o formulário para começar.<br><button class="btn" type="button" onclick="carregarExemplo()">Ver um exemplo</button></li>`
-        : transFiltradas.length ? transFiltradas.map(([t, i]) => `
-    <li class="item${t[3] ? ' pago' : ''}">
+        : transFiltradas.length ? transFiltradas.map(([t, i]) => {
+          const parcial = !t[3] && (t[4] || 0) > 0;
+          return `
+    <li class="item${t[3] ? ' pago' : ''}${parcial ? ' parcial' : ''}">
       <input type="checkbox" class="pagar" data-pagar-reg="${i}" ${t[3] ? 'checked' : ''} aria-label="Marcar como paga a transação ${i + 1}: ${esc(t[0])} deve a ${esc(t[2])}" title="${t[3] ? 'Desmarcar como paga' : 'Marcar como paga (sai dos saldos e das Transações Mínimas)'}">
       <span class="txt"><strong>${esc(t[0])}</strong><em>deve a</em><strong>${esc(t[2])}</strong></span>
-      <span class="valor-col"><span class="valor">${brl(Math.round(t[1] * 100))}</span>${t[3] ? '<small class="selo-pago">Pago</small>' : ''}</span>
+      <span class="valor-col"><span class="valor">${brl(Math.round(t[1] * 100))}</span>${t[3] ? '<small class="selo-pago">Pago</small>' : (parcial ? `<small class="selo-parcial">${brl(Math.round(t[4] * 100))} de ${brl(Math.round(t[1] * 100))} pago</small>` : '')}</span>
+      <button class="icone" data-parcial-reg="${i}" aria-label="Marcar pagamento parcial da transação ${i + 1}" title="Pagamento parcial">${ICONES.parcial}</button>
       <button class="icone" data-edit="${i}" aria-label="Editar transação ${i + 1}" title="Editar">${ICONES.editar}</button>
       <button class="icone del" data-del="${i}" aria-label="Excluir transação ${i + 1}" title="Excluir">${ICONES.excluir}</button>
-    </li>`).join('') : `<li class="vazio">Nenhuma transação encontrada para "${esc(filtroTrans.trim())}".</li>`;
+    </li>`;
+        }).join('') : `<li class="vazio">Nenhuma transação encontrada para "${esc(filtroTrans.trim())}".</li>`;
 
       const buscaAcertos = semAcento(filtroAcertos.trim());
       const acertosFiltrados = aplicarOrdem(
@@ -168,8 +182,11 @@
       $('listaAcertos').innerHTML = !acertos.length
         ? `<li class="vazio"><b>${transacoes.length ? 'Tudo quitado!' : 'Aguardando transações'}</b>${transacoes.length ? 'Nenhuma transferência é necessária.' : 'Assim que você registrar a primeira, o resultado aparece aqui.'}</li>`
         : acertosFiltrados.length ? acertosFiltrados.map(([a, i]) => {
-          const pago = pagos.has(chaveAcerto(a)); return `
-    <li class="item${pago ? ' pago' : ''}">
+          const pago = acertoPagoCompleto(a);
+          const valorPago = acertoValorPago(a);
+          const parcial = !pago && valorPago > 0;
+          return `
+    <li class="item${pago ? ' pago' : ''}${parcial ? ' parcial' : ''}">
       <input type="checkbox" class="pagar" data-pagar="${i}" ${pago ? 'checked' : ''} aria-label="Marcar como pago: ${esc(a.de)} para ${esc(a.para)}" title="${pago ? 'Desmarcar pagamento' : 'Marcar como pago'}">
       <div class="acerto">
         ${avatar(a.de)}
@@ -178,7 +195,8 @@
         ${avatar(a.para)}
         <span class="nome">${esc(a.para)}<small>recebe</small></span>
       </div>
-      <span class="valor-col"><span class="valor pos">${brl(Math.round(a.valor * 100))}</span>${pago ? '<small class="selo-pago">Pago</small>' : ''}</span>
+      <span class="valor-col"><span class="valor pos">${brl(Math.round(a.valor * 100))}</span>${pago ? '<small class="selo-pago">Pago</small>' : (parcial ? `<small class="selo-parcial">${brl(Math.round(valorPago * 100))} de ${brl(Math.round(a.valor * 100))} pago</small>` : '')}</span>
+      <button class="icone" data-parcial="${i}" aria-label="Marcar pagamento parcial: ${esc(a.de)} para ${esc(a.para)}" title="Pagamento parcial">${ICONES.parcial}</button>
     </li>`;
         }).join('') : `<li class="vazio">Nenhuma transferência encontrada para "${esc(filtroAcertos.trim())}".</li>`;
 
@@ -274,8 +292,14 @@
       if (!(v > 0)) return erro('Informe um valor maior que zero.', 'valor');
       if (p.toLowerCase() === r.toLowerCase()) return erro('Pagador e recebedor devem ser pessoas diferentes.', 'recebedor');
 
-            if (editando === -1) { transacoes.push([nomeCanonico(p), v, nomeCanonico(r), false]); aviso('Transação adicionada.'); const nova = transacoes[transacoes.length - 1]; if (window.AnimacaoTransacao) AnimacaoTransacao.mostrar({ de: nova[0], para: nova[2], valor: nova[1] }); }
-      else { transacoes[editando] = [nomeCanonico(p), v, nomeCanonico(r), !!transacoes[editando][3]]; aviso('Transação atualizada.'); }
+            if (editando === -1) { transacoes.push([nomeCanonico(p), v, nomeCanonico(r), false, 0]); aviso('Transação adicionada.'); const nova = transacoes[transacoes.length - 1]; if (window.AnimacaoTransacao) AnimacaoTransacao.mostrar({ de: nova[0], para: nova[2], valor: nova[1] }); }
+      else {
+        const antigo = transacoes[editando];
+        let pagoFlag = !!antigo[3], valorPagoFlag = antigo[4] || 0;
+        if (valorPagoFlag >= v - 0.005) { pagoFlag = true; valorPagoFlag = v; } // valor editado ficou menor que o já pago: quita sozinho
+        transacoes[editando] = [nomeCanonico(p), v, nomeCanonico(r), pagoFlag, valorPagoFlag];
+        aviso('Transação atualizada.');
+      }
       sairDaEdicao();
       render();
       focarProximo();
@@ -372,7 +396,7 @@
 
     /* ---------- Ações da lista ---------- */
     $('listaTrans').addEventListener('click', e => {
-      const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]');
+      const ed = e.target.closest('[data-edit]'), del = e.target.closest('[data-del]'), parc = e.target.closest('[data-parcial-reg]');
       if (ed) {
         const i = +ed.dataset.edit, t = transacoes[i];
         editando = i;
@@ -385,6 +409,22 @@
         $('form').scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
       if (del) pedirExclusao(+del.dataset.del);
+      if (parc) {
+        const i = +parc.dataset.parcialReg, t = transacoes[i];
+        if (!t) return;
+        ParcialModal.abrir({
+          titulo: 'Pagamento parcial',
+          descricao: `<strong>${esc(t[0])}</strong> deve ${brl(Math.round(t[1] * 100))} a <strong>${esc(t[2])}</strong>`,
+          valorTotal: t[1],
+          valorAtual: t[4] || 0,
+          aoConfirmar: valor => {
+            if (valor <= 0) { t[4] = 0; aviso('Pagamento parcial removido.'); }
+            else if (valor >= t[1] - 0.005) { t[3] = true; t[4] = t[1]; aviso('Transação marcada como paga.'); }
+            else { t[4] = valor; t[3] = false; aviso('Pagamento parcial salvo.'); }
+            render();
+          }
+        });
+      }
     });
 
         $('listaTrans').addEventListener('change', e => {
@@ -393,6 +433,7 @@
       const i = +cb.dataset.pagarReg, t = transacoes[i];
       if (!t) return;
       t[3] = cb.checked;
+      t[4] = cb.checked ? t[1] : 0;
       aviso(cb.checked
         ? 'Transação marcada como paga. Ela saiu dos saldos e das Transações Mínimas.'
         : 'Transação voltou para os saldos e para as Transações Mínimas.');
@@ -407,7 +448,7 @@
       if (!cb) return;
       const i = +cb.dataset.pagar, a = acertosAtuais[i];
       if (!a) return;
-      if (cb.checked) pagos.add(chaveAcerto(a)); else pagos.delete(chaveAcerto(a));
+      if (cb.checked) pagos.set(chaveAcerto(a), a.valor); else pagos.delete(chaveAcerto(a));
       render();
       const novo = document.querySelector(`[data-pagar="${i}"]`);
       if (novo) novo.focus();
@@ -417,6 +458,26 @@
       } else {
         aviso('Pagamento desmarcado.');
       }
+    });
+
+    $('listaAcertos').addEventListener('click', e => {
+      const parc = e.target.closest('[data-parcial]');
+      if (!parc) return;
+      const i = +parc.dataset.parcial, a = acertosAtuais[i];
+      if (!a) return;
+      const chave = chaveAcerto(a);
+      ParcialModal.abrir({
+        titulo: 'Pagamento parcial',
+        descricao: `<strong>${esc(a.de)}</strong> paga <strong>${esc(a.para)}</strong>`,
+        valorTotal: a.valor,
+        valorAtual: acertoValorPago(a),
+        aoConfirmar: valor => {
+          if (valor <= 0) { pagos.delete(chave); aviso('Pagamento parcial removido.'); }
+          else if (valor >= a.valor - 0.005) { pagos.set(chave, a.valor); aviso('Transferência marcada como paga.'); }
+          else { pagos.set(chave, valor); aviso('Pagamento parcial salvo.'); }
+          render();
+        }
+      });
     });
 
     /* ---------- Topo ---------- */
@@ -476,7 +537,7 @@
 
     function reiniciarTudo() {
       const backup = transacoes.slice();
-      const backupPagos = new Set(pagos);
+      const backupPagos = new Map(pagos);
       transacoes = [];
       sairDaEdicao();
       render();
@@ -491,7 +552,7 @@
       const acertos = calcularAcertos();
       if (!acertos.length) return aviso('Não há transferências para copiar.');
       const n = acertos.length;
-      const pago = a => pagos.has(chaveAcerto(a));
+      const pago = acertoPagoCompleto;
       CopiarModal.abrir({
         titulo: 'Copiar Transações Mínimas',
         qtd: n,
@@ -508,7 +569,7 @@
 
     /* ---------- Importar resumo colado ---------- */
     ImportarResumo.ligar([$('pagador'), $('recebedor'), $('valor')], linhas => {
-      linhas.forEach(l => transacoes.push([nomeCanonico(l.pagador), l.valor, nomeCanonico(l.recebedor), !!l.pago]));
+      linhas.forEach(l => transacoes.push([nomeCanonico(l.pagador), l.valor, nomeCanonico(l.recebedor), !!l.pago, l.pago ? l.valor : 0]));
       render();
       aviso(linhas.length === 1 ? '1 transação adicionada.' : `${linhas.length} transações adicionadas.`);
     }, nomesExistentes);
@@ -518,7 +579,7 @@
     /* ---------- Dividir conta em grupo ---------- */
     ContaConjunta.ligar(nomesExistentes, ({ pagador, partes }) => {
       const pagadorNome = nomeCanonico(pagador);
-      partes.forEach(p => transacoes.push([nomeCanonico(p.nome), p.valor, pagadorNome, false]));
+      partes.forEach(p => transacoes.push([nomeCanonico(p.nome), p.valor, pagadorNome, false, 0]));
       render();
       aviso(partes.length === 1 ? '1 transação adicionada.' : `${partes.length} transações adicionadas.`);
     });
@@ -561,13 +622,13 @@
     $('btnExportar').addEventListener('click', () => {
       const acertos = calcularAcertos();
       if (!acertos.length) return aviso('Não há transferências para exportar.');
-      const pendentes = acertos.filter(a => !pagos.has(chaveAcerto(a)));
+      const pendentes = acertos.filter(a => !acertoPagoCompleto(a));
       ExportarModal.abrir({
         total: acertos.length,
         pendentes: pendentes.length,
         aoEscolher: modo => {
           const base = modo === 'pendentes' ? pendentes : acertos;
-          gerarPlanilha(base.map(a => [a.de, Number(a.valor), a.para, pagos.has(chaveAcerto(a)) ? 'Sim' : 'Não']),
+          gerarPlanilha(base.map(a => [a.de, Number(a.valor), a.para, acertoPagoCompleto(a) ? 'Sim' : 'Não']),
             modo === 'pendentes' ? 'transferencias-pendentes' : 'transferencias');
         }
       });

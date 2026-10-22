@@ -29,11 +29,11 @@
 -- Interface --
 ✅ alternar entre tema claro e escuro (botão no header, igual a chave de "Mostrar animação"; auditei o site inteiro nos dois temas pra garantir contraste em cards, modais, inputs e botões)
 
+-- Transações mínimas --
+✅ permitir marcar uma transferência mínima como paga parcialmente (valor parcial) (feito nas duas listas — registradas e mínimas — com modal próprio; o cálculo passa a usar o valor restante, e pagamentos parciais presos a uma transferência mínima que deixa de existir num recálculo são descartados com aviso, igual já acontecia com o "pago" inteiro)
+
 
 == NÃO FEITOS ==
-
--- Transações mínimas --
-permitir marcar uma transferência mínima como paga parcialmente (valor parcial)
 
 -- Pessoas / Saldos --
 suportar mais de um grupo/rateio separado (ex.: viagem e república em listas distintas)
