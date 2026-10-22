@@ -81,6 +81,12 @@
           </div>
           <div class="previa" id="previa" aria-live="polite">Preencha os campos para ver o resumo da transação.</div>
 
+          <div class="erro" id="erro" role="alert"></div>
+          <div class="linha-btns">
+            <button class="btn primario" id="btnSalvar" type="submit">Adicionar transação</button>
+            <button class="btn" id="btnCancelar" type="button" hidden>Cancelar</button>
+          </div>
+
           <div class="lote-bloco">
             <p class="lote-titulo">Adicionar em lote</p>
 
@@ -96,12 +102,6 @@
 
               <input type="file" id="arquivoExcel" accept=".xlsx,.xlsm,.csv,.tsv,.txt" hidden>
             </div>
-          </div>
-
-          <div class="erro" id="erro" role="alert"></div>
-          <div class="linha-btns">
-            <button class="btn primario" id="btnSalvar" type="submit">Adicionar transação</button>
-            <button class="btn" id="btnCancelar" type="button" hidden>Cancelar</button>
           </div>
         </form>
       </section>
@@ -185,6 +185,7 @@
   <script src="js/interface/autocomplete.js"></script>
   <script src="js/interface/copiar.js"></script>
   <script src="js/interface/ordenar.js"></script>
+  <script src="js/interface/parcial.js"></script>
   <script src="js/interface/exportar.js"></script>
   <script src="js/interface/conta-conjunta.js"></script>
   <script src="js/dados/importar.js"></script>
