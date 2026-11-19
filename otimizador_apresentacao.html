@@ -468,6 +468,37 @@
   .res-step.visible {
     display: block;
   }
+
+  /* Faixa de Custo por Etapa */
+  .cost-strip {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    background: #0a1222;
+    border: 1.5px dashed rgba(251, 191, 36, 0.55);
+    border-radius: 12px;
+    padding: 12px 18px;
+  }
+  .cost-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+  .cost-item { display: flex; flex-direction: column; gap: 2px; }
+  .cost-item .k {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .cost-item strong { font-size: 15.5px; color: #fff; }
+  .cost-strip.stacked { gap: 6px 26px; padding: 10px 16px; }
+  .cost-strip.stacked .cost-label { width: 100%; }
+  .cost-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 16px; }
 </style>
 </head>
 <body>
@@ -480,7 +511,7 @@
   <div class="top-right">
     <a href="index.html" style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text-muted);background:#111827;padding:4px 10px;border-radius:6px;border:1px solid var(--border);text-decoration:none;transition:color .2s;" onmouseover="this.style.color='var(--cyan-bright)'" onmouseout="this.style.color='var(--text-muted)'">← Voltar ao app</a>
     <span class="kbd-hint">Use ← → ou Espaço</span>
-    <div class="slide-counter" id="slideCounter">SLIDE 01 / 14</div>
+    <div class="slide-counter" id="slideCounter">SLIDE 01 / 11</div>
   </div>
 </div>
 
@@ -506,7 +537,7 @@
         <div class="card card-highlight">
           <div class="slide-tag">COMPLEXIDADE TEMPORAL</div>
           <div style="font-size: 28px; font-weight: 900; color: var(--cyan-bright); margin: 4px 0;">O(L·N + N log N)</div>
-          <p style="font-size: 16px;">Otimizável para <strong style="color:#fff;">O(L + N log N)</strong> com Hash Map</p>
+          <p style="font-size: 16px;">Consolidação + Merge Sort + Dois Ponteiros</p>
         </div>
         <div class="card">
           <div class="slide-tag">GARANTIA DE SAÍDA</div>
@@ -726,6 +757,21 @@
         </div>
       </div>
     </div>
+    <div class="cost-row">
+    <div class="cost-strip stacked">
+      <div class="cost-label">CUSTO · ETAPA 1</div>
+      <div class="cost-item"><span class="k">Operação básica</span><strong>Comparação de strings (<span class="mono">findIndex</span>)</strong></div>
+      <div class="cost-item"><span class="k">Frequência</span><strong class="mono">2 · L · N</strong></div>
+      <div class="cost-item"><span class="k">Ordem</span><span class="badge badge-neg">O(L · N)</span></div>
+    </div>
+    <div class="cost-strip stacked">
+      <div class="cost-label">CUSTO · ETAPA 2</div>
+      <div class="cost-item"><span class="k">Operação básica</span><strong><span class="mono">|saldo| &gt; 0,005</span></strong></div>
+      <div class="cost-item"><span class="k">Frequência</span><strong class="mono">N</strong></div>
+      <div class="cost-item"><span class="k">Ordem</span><span class="badge badge-cyan">Θ(N)</span></div>
+    </div>
+    </div>
+    <p style="font-size:14.5px; color:var(--text-muted); margin-top:8px;"><strong style="color:#cbd5e1;">L</strong> = despesas registradas (linhas da matriz, C = 3 colunas) · <strong style="color:#cbd5e1;">N</strong> = pessoas distintas, com N ≤ 2L</p>
   </section>
 
   <!-- SLIDE 05: ETAPA 3 - MERGE SORT INTERATIVO COM ÁRVORE COMPLETA -->
@@ -752,6 +798,13 @@
         <div id="mergeVisualBox" style="margin-top:8px;">
           <!-- Renderizado via JS com a árvore completa -->
         </div>
+    <div style="margin-top:10px;">
+    <div class="cost-strip" style="gap:28px; padding:9px 16px;">
+      <div class="cost-item"><span class="k" style="color:var(--amber);">Custo Etapa 3 · Operação básica</span><strong class="mono" style="font-size:14px;">l[i].saldo &lt;= r[j].saldo</strong></div>
+      <div class="cost-item"><span class="k">Frequência</span><strong class="mono" style="font-size:14px;">N · log₂ N</strong></div>
+      <div class="cost-item"><span class="k">Ordem</span><span class="badge badge-cyan">Θ(N log N)</span></div>
+    </div>
+    </div>
       </div>
 
       <div class="card">
@@ -826,130 +879,80 @@
         <span style="color:var(--text-muted); font-size:16px;">Nenhuma transferência registrada ainda. Clique em "Executar Transferência".</span>
       </div>
     </div>
+    <div style="margin-top:16px;">
+    <div class="cost-strip">
+      <div class="cost-label">CUSTO · ETAPA 4</div>
+      <div class="cost-item"><span class="k">Operação básica</span><strong>Atualização de saldo + avanço de ponteiro</strong></div>
+      <div class="cost-item"><span class="k">Frequência</span><strong class="mono">≤ N − 1</strong></div>
+      <div class="cost-item"><span class="k">Ordem</span><span class="badge badge-pos">O(N)</span></div>
+    </div>
+    </div>
   </section>
 
-  <!-- SLIDE 07: CÓDIGO DOS DOIS PONTEIROS & PROVA DO LIMITE N - 1 -->
+  <!-- SLIDE 07: COMPORTAMENTO ASSINTÓTICO POR CENÁRIO -->
   <section class="slide" data-slide="7">
     <div class="slide-header">
-      <div class="slide-tag">06 · IMPLEMENTAÇÃO &amp; PROVA FORMAL</div>
-      <h2 class="slide-title">Código da Liquidação e Invariante Fundamental</h2>
-      <p class="slide-subtitle">Por que o laço executa no máximo N − 1 iterações?</p>
-    </div>
-
-    <div class="grid-2" style="flex:1; align-items: stretch;">
-      <div class="card">
-        <h3>Implementação <span class="mono">TWO_POINTERS_SETTLEMENT.JS</span></h3>
-        <pre><span class="kw">let</span> esq = <span class="num">0</span>;
-<span class="kw">let</span> dir = ativos.length - <span class="num">1</span>;
-
-<span class="kw">while</span> (esq &lt; dir) {
-  <span class="kw">const</span> devedor = ativos[esq];
-  <span class="kw">const</span> credor  = ativos[dir];
-  <span class="kw">const</span> val = Math.<span class="fn">min</span>(-devedor.saldo, credor.saldo);
-
-  <span class="fn">registrarPix</span>(devedor.nome, credor.nome, val);
-
-  devedor.saldo += val;
-  credor.saldo  -= val;
-
-  <span class="kw">if</span> (Math.<span class="fn">abs</span>(devedor.saldo) &lt;= <span class="num">0.005</span>) esq++;
-  <span class="kw">if</span> (Math.<span class="fn">abs</span>(credor.saldo)  &lt;= <span class="num">0.005</span>) dir--;
-}</pre>
-      </div>
-
-      <div style="display:flex; flex-direction:column; gap:18px;">
-        <div class="card card-highlight">
-          <h3>Invariante de Laço (Prova de Cotas)</h3>
-          <p>A cada iteração do <span class="mono">while (esq &lt; dir)</span>, transferimos <span class="mono" style="color:var(--cyan-bright);">val = min(|saldo[esq]|, saldo[dir])</span>. Isso garante matematicamente que:</p>
-          <ul style="padding-left:22px; margin-top:10px; display:flex; flex-direction:column; gap:10px;">
-            <li>Pelo menos <strong>1 ponteiro avança</strong> (<span class="mono">esq++</span> ou <span class="mono">dir--</span>), eliminando 1 pessoa ativa.</li>
-            <li>Quando restam apenas 2 pessoas (<span class="mono">dir - esq = 1</span>), pela conservação de soma zero, <span class="mono">|saldo[esq]| == saldo[dir]</span>, zerando <strong>ambas simultaneamente</strong> na última transferência.</li>
-          </ul>
-        </div>
-        <div class="card">
-          <h3>Conclusão Matemática</h3>
-          <p>Como existem <span class="mono">N</span> participantes ativos e o último passo liquida 2 pessoas de uma só vez, o total de pagamentos é estritamente <strong style="color:var(--green);">≤ N − 1</strong>, com custo linear <span class="mono">T₄(N) = O(N)</span>.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 08: PARÂMETROS & FREQUÊNCIA DE OPERAÇÕES -->
-  <section class="slide" data-slide="8">
-    <div class="slide-header">
-      <div class="slide-tag">07 · CONTAGEM ANALÍTICA</div>
-      <h2 class="slide-title">Parâmetros de Entrada e Frequência de Operações</h2>
-      <p class="slide-subtitle">Mapeamento exato do custo computacional de cada etapa do algoritmo.</p>
+      <div class="slide-tag">06 · ANÁLISE DE CENÁRIOS</div>
+      <h2 class="slide-title">Comportamento Assintótico: Pior e Melhor Caso</h2>
+      <p class="slide-subtitle">A busca linear na Etapa 1 determina a variação entre Ω(L + N log N) e O(L·N + N log N).</p>
     </div>
 
     <div class="grid-3" style="margin-bottom: 22px;">
-      <div class="card">
-        <div class="slide-tag">PARÂMETRO L</div>
-        <div style="font-size:26px; font-weight:900; margin: 4px 0;">Despesas Registradas</div>
-        <p style="font-size:15.5px;">Número de linhas da matriz de transações (<span class="mono">C = 3</span> colunas fixas).</p>
+      <div class="card" style="border-top: 4px solid var(--red-strong);">
+        <div class="badge badge-neg" style="margin-bottom:10px;">PIOR CASO · BIG-O</div>
+        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">O(L·N + N log N)</div>
+        <p style="font-size:15.5px;">Cada nome buscado via <span class="mono">findIndex</span> está no final do vetor de participantes, exigindo <span class="mono">N</span> comparações por transação.</p>
       </div>
-      <div class="card">
-        <div class="slide-tag">PARÂMETRO N</div>
-        <div style="font-size:26px; font-weight:900; margin: 4px 0;">Pessoas Distintas</div>
-        <p style="font-size:15.5px;">Limitado superiormente por <span class="mono">N ≤ 2L</span> (no máximo 2 nomes novos por linha).</p>
+
+      <div class="card" style="border-top: 4px solid var(--green-strong);">
+        <div class="badge badge-pos" style="margin-bottom:10px;">MELHOR CASO · BIG-OMEGA</div>
+        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">Ω(L + N log N)</div>
+        <p style="font-size:15.5px;">Os nomes aparecem sempre nas primeiras posições da lista, tornando a busca quase imediata (<span class="mono">O(1)</span> por transação).</p>
       </div>
-      <div class="card card-highlight">
-        <div class="slide-tag">FUNÇÃO DE CUSTO T</div>
-        <div style="font-size:26px; font-weight:900; color:var(--cyan-bright); margin: 4px 0;">T(L, N)</div>
-        <p style="font-size:15.5px;">Soma das operações elementares executadas nas 4 etapas.</p>
+
+      <div class="card" style="border-top: 4px solid var(--amber);">
+        <div class="badge badge-amber" style="margin-bottom:10px;">CONCLUSÃO · SEM Θ ÚNICO</div>
+        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">∄ Θ único</div>
+        <p style="font-size:15.5px;">Um <span class="mono">Θ</span> só existe quando os limites <span class="mono">O</span> e <span class="mono">Ω</span> têm a mesma ordem. Como <span class="mono">L·N + N log N ≠ L + N log N</span>, o algoritmo <strong>não tem Θ único</strong>.</p>
       </div>
     </div>
 
-    <div class="card" style="flex:1;">
-      <h3>Tabela de Frequência de Operações por Etapa</h3>
+    <div class="card">
+      <h3>Comparação Assintótica Detalhada</h3>
       <table>
         <thead>
           <tr>
-            <th>Etapa</th>
-            <th>Descrição do Processo</th>
-            <th>Operação Básica</th>
-            <th>Frequência Exata</th>
-            <th>Ordem Assintótica</th>
+            <th>Cenário</th>
+            <th>Etapa 1 (Consolidação)</th>
+            <th>Etapa 3 (Merge Sort)</th>
+            <th>Etapas 2 &amp; 4</th>
+            <th>Complexidade Global</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>1. Consolidar</strong></td>
-            <td>Busca linear (<span class="mono">findIndex</span>) para pagador e recebedor em L linhas</td>
-            <td>Comparação de strings</td>
-            <td class="mono">2 · L · N (pior caso)</td>
-            <td><span class="badge badge-neg">O(L · N)</span></td>
+            <td><strong>Pior Caso</strong></td>
+            <td class="mono" style="color:#fda4af; font-weight:700;">O(L · N)</td>
+            <td class="mono">Θ(N log N)</td>
+            <td class="mono">O(N)</td>
+            <td class="mono" style="color:#fff;"><strong>O(L·N + N log N)</strong></td>
           </tr>
           <tr>
-            <td><strong>2. Filtrar</strong></td>
-            <td>Verificação de tolerância numérica de ponto flutuante</td>
-            <td><span class="mono">|saldo| &gt; 0,005</span></td>
-            <td class="mono">N</td>
-            <td><span class="badge badge-cyan">Θ(N)</span></td>
-          </tr>
-          <tr>
-            <td><strong>3. Ordenar</strong></td>
-            <td>Divisão recursiva e intercalação ordenada (<span class="mono">Merge Sort</span>)</td>
-            <td><span class="mono">l[i].saldo &lt;= r[j].saldo</span></td>
-            <td class="mono">N · log₂ N</td>
-            <td><span class="badge badge-cyan">Θ(N log N)</span></td>
-          </tr>
-          <tr>
-            <td><strong>4. Liquidar</strong></td>
-            <td>Movimentação convergente dos ponteiros <span class="mono">esq</span> e <span class="mono">dir</span></td>
-            <td>Atualização de saldo + avanço</td>
-            <td class="mono">≤ N − 1</td>
-            <td><span class="badge badge-pos">O(N)</span></td>
+            <td><strong>Melhor Caso</strong></td>
+            <td class="mono" style="color:#6ee7b7; font-weight:700;">Ω(L)</td>
+            <td class="mono">Θ(N log N)</td>
+            <td class="mono">Ω(N)</td>
+            <td class="mono" style="color:#fff;"><strong>Ω(L + N log N)</strong></td>
           </tr>
         </tbody>
       </table>
     </div>
   </section>
 
-  <!-- SLIDE 09: TEOREMA MESTRE E ÁRVORE DE RECORRÊNCIA -->
-  <section class="slide" data-slide="9">
+  <!-- SLIDE 08: TEOREMA MESTRE E ÁRVORE DE RECORRÊNCIA -->
+  <section class="slide" data-slide="8">
     <div class="slide-header">
-      <div class="slide-tag">08 · PROVA FORMAL DO MERGE SORT</div>
+      <div class="slide-tag">07 · PROVA FORMAL DO MERGE SORT</div>
       <h2 class="slide-title">Teorema Mestre &amp; Árvore de Recorrência</h2>
       <p class="slide-subtitle">Demonstração rigorosa de que T₃(N) = 2T₃(N/2) + O(N) pertence a Θ(N log N).</p>
     </div>
@@ -1010,162 +1013,56 @@
     </div>
   </section>
 
-  <!-- SLIDE 10: COMPORTAMENTO ASSINTÓTICO POR CENÁRIO -->
+  <!-- SLIDE 09: CÓDIGO DOS DOIS PONTEIROS & PROVA DO LIMITE N - 1 -->
+  <section class="slide" data-slide="9">
+    <div class="slide-header">
+      <div class="slide-tag">08 · IMPLEMENTAÇÃO &amp; PROVA FORMAL</div>
+      <h2 class="slide-title">Código da Liquidação e Invariante Fundamental</h2>
+      <p class="slide-subtitle">Por que o laço executa no máximo N − 1 iterações?</p>
+    </div>
+
+    <div class="grid-2" style="flex:1; align-items: stretch;">
+      <div class="card">
+        <h3>Implementação <span class="mono">TWO_POINTERS_SETTLEMENT.JS</span></h3>
+        <pre><span class="kw">let</span> esq = <span class="num">0</span>;
+<span class="kw">let</span> dir = ativos.length - <span class="num">1</span>;
+
+<span class="kw">while</span> (esq &lt; dir) {
+  <span class="kw">const</span> devedor = ativos[esq];
+  <span class="kw">const</span> credor  = ativos[dir];
+  <span class="kw">const</span> val = Math.<span class="fn">min</span>(-devedor.saldo, credor.saldo);
+
+  <span class="fn">registrarPix</span>(devedor.nome, credor.nome, val);
+
+  devedor.saldo += val;
+  credor.saldo  -= val;
+
+  <span class="kw">if</span> (Math.<span class="fn">abs</span>(devedor.saldo) &lt;= <span class="num">0.005</span>) esq++;
+  <span class="kw">if</span> (Math.<span class="fn">abs</span>(credor.saldo)  &lt;= <span class="num">0.005</span>) dir--;
+}</pre>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:18px;">
+        <div class="card card-highlight">
+          <h3>Invariante de Laço (Prova de Cotas)</h3>
+          <p>A cada iteração do <span class="mono">while (esq &lt; dir)</span>, transferimos <span class="mono" style="color:var(--cyan-bright);">val = min(|saldo[esq]|, saldo[dir])</span>. Isso garante matematicamente que:</p>
+          <ul style="padding-left:22px; margin-top:10px; display:flex; flex-direction:column; gap:10px;">
+            <li>Pelo menos <strong>1 ponteiro avança</strong> (<span class="mono">esq++</span> ou <span class="mono">dir--</span>), eliminando 1 pessoa ativa.</li>
+            <li>Quando restam apenas 2 pessoas (<span class="mono">dir - esq = 1</span>), pela conservação de soma zero, <span class="mono">|saldo[esq]| == saldo[dir]</span>, zerando <strong>ambas simultaneamente</strong> na última transferência.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Conclusão Matemática</h3>
+          <p>Como existem <span class="mono">N</span> participantes ativos e o último passo liquida 2 pessoas de uma só vez, o total de pagamentos é estritamente <strong style="color:var(--green);">≤ N − 1</strong>, com custo linear <span class="mono">T₄(N) = O(N)</span>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 10: QUESTÃO ENADE 1 -->
   <section class="slide" data-slide="10">
     <div class="slide-header">
-      <div class="slide-tag">09 · ANÁLISE DE CENÁRIOS</div>
-      <h2 class="slide-title">Comportamento Assintótico: Pior, Melhor e Caso Médio</h2>
-      <p class="slide-subtitle">A busca linear na Etapa 1 determina a variação entre Ω(L + N log N) e O(L·N + N log N).</p>
-    </div>
-
-    <div class="grid-3" style="margin-bottom: 22px;">
-      <div class="card" style="border-top: 4px solid var(--red-strong);">
-        <div class="badge badge-neg" style="margin-bottom:10px;">PIOR CASO · BIG-O</div>
-        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">O(L·N + N log N)</div>
-        <p style="font-size:15.5px;">Cada nome buscado via <span class="mono">findIndex</span> está no final do vetor de participantes, exigindo <span class="mono">N</span> comparações por transação.</p>
-      </div>
-
-      <div class="card" style="border-top: 4px solid var(--green-strong);">
-        <div class="badge badge-pos" style="margin-bottom:10px;">MELHOR CASO · BIG-OMEGA</div>
-        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">Ω(L + N log N)</div>
-        <p style="font-size:15.5px;">Os nomes aparecem sempre nas primeiras posições da lista, tornando a busca quase imediata (<span class="mono">O(1)</span> por transação).</p>
-      </div>
-
-      <div class="card" style="border-top: 4px solid var(--cyan);">
-        <div class="badge badge-cyan" style="margin-bottom:10px;">CASO MÉDIO · BIG-THETA</div>
-        <div class="mono" style="font-size:21px; font-weight:900; color:#fff; margin-bottom:8px;">Θ(L·N + N log N)</div>
-        <p style="font-size:15.5px;">Em média a busca percorre <span class="mono">N / 2</span> posições. Sem Tabela Hash, o termo <span class="mono">L · N</span> domina quando <span class="mono">L ≫ log N</span>.</p>
-      </div>
-    </div>
-
-    <div class="card" style="flex:1;">
-      <h3>Comparação Assintótica Detalhada</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Cenário</th>
-            <th>Etapa 1 (Consolidação)</th>
-            <th>Etapa 3 (Merge Sort)</th>
-            <th>Etapas 2 &amp; 4</th>
-            <th>Complexidade Global</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Pior Caso</strong></td>
-            <td class="mono" style="color:#fda4af; font-weight:700;">O(L · N)</td>
-            <td class="mono">Θ(N log N)</td>
-            <td class="mono">O(N)</td>
-            <td class="mono" style="color:#fff;"><strong>O(L·N + N log N)</strong></td>
-          </tr>
-          <tr>
-            <td><strong>Melhor Caso</strong></td>
-            <td class="mono" style="color:#6ee7b7; font-weight:700;">Ω(L)</td>
-            <td class="mono">Θ(N log N)</td>
-            <td class="mono">Ω(N)</td>
-            <td class="mono" style="color:#fff;"><strong>Ω(L + N log N)</strong></td>
-          </tr>
-          <tr>
-            <td><strong>Caso Médio</strong></td>
-            <td class="mono" style="color:var(--cyan-bright); font-weight:700;">Θ(L · N)</td>
-            <td class="mono">Θ(N log N)</td>
-            <td class="mono">Θ(N)</td>
-            <td class="mono" style="color:#fff;"><strong>Θ(L·N + N log N)</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- SLIDE 11: COMPLEXIDADE E GARGALOS (AMPULHETA VS HASH MAP) -->
-  <section class="slide" data-slide="11">
-    <div class="slide-header">
-      <div class="slide-tag">10 · OTIMIZAÇÃO ESTRUTURAL</div>
-      <h2 class="slide-title">Complexidade e Gargalos: Lista Linear vs. Hash Map</h2>
-      <p class="slide-subtitle">Como a troca da estrutura de dados na Etapa 1 elimina o gargalo multiplicativo.</p>
-    </div>
-
-    <div class="grid-2" style="flex:1; align-items: center;">
-      <div class="card" style="text-align:center; border-color: rgba(244, 63, 94, 0.5);">
-        <div class="badge badge-neg" style="margin-bottom:14px;">ABORDAGEM ATUAL (VETOR + FINDINDEX)</div>
-        <svg viewBox="0 0 120 120" style="width:105px; height:105px; margin: 8px auto;">
-          <path d="M30,15 L90,15 L90,28 L66,58 L90,88 L90,105 L30,105 L30,88 L54,58 L30,28 Z" fill="none" stroke="#fb7185" stroke-width="4.5"/>
-          <polygon points="38,26 82,26 60,52" fill="#fb7185" opacity="0.65"/>
-          <polygon points="42,98 78,98 60,76" fill="#fb7185"/>
-        </svg>
-        <div class="mono" style="font-size:30px; font-weight:900; color:#fda4af; margin: 10px 0;">O(L · N)</div>
-        <p>Para cada uma das <span class="mono">L</span> despesas, <span class="mono">findIndex()</span> realiza uma varredura linear sobre até <span class="mono">N</span> usuários. Quando <span class="mono">L ≫ log N</span>, este termo domina todo o algoritmo.</p>
-      </div>
-
-      <div class="card card-highlight" style="text-align:center;">
-        <div class="badge badge-pos" style="margin-bottom:14px;">OTIMIZAÇÃO PROPOSTA (TABELA HASH / MAP)</div>
-        <svg viewBox="0 0 140 120" style="width:120px; height:105px; margin: 8px auto;">
-          <rect x="12" y="20" width="44" height="80" rx="7" fill="#0f172a" stroke="#2dd4bf" stroke-width="3.5"/>
-          <line x1="12" y1="47" x2="56" y2="47" stroke="#2dd4bf" stroke-width="2.5"/>
-          <line x1="12" y1="74" x2="56" y2="74" stroke="#2dd4bf" stroke-width="2.5"/>
-          <circle cx="34" cy="34" r="4.5" fill="#34d399"/>
-          <circle cx="34" cy="60" r="4.5" fill="#34d399"/>
-          <line x1="56" y1="60" x2="88" y2="60" stroke="#34d399" stroke-width="3.5"/>
-          <polygon points="86,53 97,60 86,67" fill="#34d399"/>
-          <rect x="97" y="42" width="36" height="36" rx="7" fill="#0f2922" stroke="#34d399" stroke-width="3"/>
-          <text x="115" y="65" fill="#6ee7b7" font-size="12.5" font-family="monospace" font-weight="900" text-anchor="middle">O(1)</text>
-        </svg>
-        <div class="mono" style="font-size:30px; font-weight:900; color:var(--green); margin: 10px 0;">O(L) esperado</div>
-        <p>Substituindo o array por um <span class="mono">Map&lt;string, number&gt;</span>, o acesso ao saldo de pagador e recebedor passa a ser <span class="mono">O(1)</span> médio, reduzindo o custo global para <strong style="color:#fff;">O(L + N log N)</strong>.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 12: SÍNTESE EXECUTIVA & CRÉDITOS -->
-  <section class="slide" data-slide="12">
-    <div class="slide-header">
-      <div class="slide-tag">11 · CONCLUSÃO DO PROJETO</div>
-      <h2 class="slide-title">Síntese Executiva &amp; Créditos</h2>
-      <p class="slide-subtitle">Consolidar primeiro simplifica os pagamentos e garante eficiência comprovada.</p>
-    </div>
-
-    <div class="grid-2" style="flex:1; align-items: center;">
-      <div style="display:flex; flex-direction:column; gap:16px;">
-        <div class="card card-highlight">
-          <h3>Eficiência Prática</h3>
-          <p>Elimina ciclos de dívida (<span class="mono">A → B → C → A</span>) e reduz <span class="mono">L</span> transações arbitrárias para no máximo <strong style="color:var(--green);">N − 1 transferências</strong> diretas.</p>
-        </div>
-        <div class="card">
-          <h3>Rigor Assintótico</h3>
-          <p>Ordenação garantida em <span class="mono">Θ(N log N)</span> provada pelo <strong>Teorema Mestre (Caso 2)</strong> e liquidação linear em <span class="mono">O(N)</span> via invariante de dois ponteiros.</p>
-        </div>
-        <div class="card">
-          <h3>Autores &amp; Disciplina</h3>
-          <p><strong style="color:#fff;">Luís Henrique · Caio César · Pedro Ricardo · João Arthur</strong><br>Análise de Algoritmos — Centro Universitário Farias Brito (FB UNI)</p>
-        </div>
-      </div>
-
-      <div class="card" style="display:flex; flex-direction:column; align-items:center; justify-content:center; background:#080d1a; height: 100%;">
-        <svg viewBox="0 0 320 235" style="width:100%; max-width:320px;">
-          <rect x="85" y="198" width="150" height="16" rx="5" fill="#475569"/>
-          <rect x="153" y="45" width="14" height="153" rx="5" fill="#2dd4bf"/>
-          <circle cx="160" cy="42" r="11" fill="#38bdf8"/>
-          <line x1="60" y1="68" x2="260" y2="68" stroke="#f8fafc" stroke-width="6" stroke-linecap="round"/>
-          <!-- Prato Esquerdo -->
-          <line x1="72" y1="68" x2="46" y2="130" stroke="#cbd5e1" stroke-width="2.5"/>
-          <line x1="72" y1="68" x2="98" y2="130" stroke="#cbd5e1" stroke-width="2.5"/>
-          <path d="M36,130 Q72,152 108,130 Z" fill="#f43f5e"/>
-          <text x="72" y="168" fill="#fda4af" font-size="13" font-family="monospace" font-weight="900" text-anchor="middle">∑ Débitos</text>
-          <!-- Prato Direito -->
-          <line x1="248" y1="68" x2="222" y2="130" stroke="#cbd5e1" stroke-width="2.5"/>
-          <line x1="248" y1="68" x2="274" y2="130" stroke="#cbd5e1" stroke-width="2.5"/>
-          <path d="M212,130 Q248,152 284,130 Z" fill="#10b981"/>
-          <text x="248" y="168" fill="#6ee7b7" font-size="13" font-family="monospace" font-weight="900" text-anchor="middle">∑ Créditos</text>
-        </svg>
-        <div class="mono" style="font-size:18px; color:var(--cyan-bright); font-weight:800; margin-top:8px;">∑ Saldo Líquido = 0,00</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SLIDE 13: QUESTÃO ENADE 1 -->
-  <section class="slide" data-slide="13">
-    <div class="slide-header">
-      <div class="slide-tag">12 · APLICAÇÃO ENADE — QUESTÃO 01 (ANÁLISE ASSINTÓTICA)</div>
+      <div class="slide-tag">09 · APLICAÇÃO ENADE — QUESTÃO 01 (ANÁLISE ASSINTÓTICA)</div>
       <h2 class="slide-title">ENADE 2014 · Notação Assintótica (<span class="mono">O, Ω, Θ</span>)</h2>
       <p class="slide-subtitle">Relação direta com a variação entre melhor caso Ω(L + N log N) e pior caso O(L·N + N log N) do nosso projeto.</p>
     </div>
@@ -1221,10 +1118,10 @@
     </div>
   </section>
 
-  <!-- SLIDE 14: QUESTÃO ENADE 2 -->
-  <section class="slide" data-slide="14">
+  <!-- SLIDE 11: QUESTÃO ENADE 2 -->
+  <section class="slide" data-slide="11">
     <div class="slide-header">
-      <div class="slide-tag">13 · APLICAÇÃO ENADE — QUESTÃO 02 (TEOREMA MESTRE)</div>
+      <div class="slide-tag">10 · APLICAÇÃO ENADE — QUESTÃO 02 (TEOREMA MESTRE)</div>
       <h2 class="slide-title">ENADE / POSCOMP · Recorrência e Teorema Mestre</h2>
       <p class="slide-subtitle">Aplicação direta do Caso 2 do Teorema Mestre — o mesmo utilizado na prova do Merge Sort.</p>
     </div>
@@ -1442,7 +1339,7 @@
     const glow4 = step === 4 ? 'box-shadow: 0 0 22px rgba(16,185,129,0.55); transform: scale(1.02);' : '';
 
     return `
-      <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; flex-direction:column; gap:6px;">
         <!-- Nível 0: Entrada -->
         <div class="cell-box" style="padding:10px 14px; ${hDiv0}">
           <div class="slide-tag" style="font-size:11.5px;">NÍVEL 0 · ENTRADA</div>
